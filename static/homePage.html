@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Page: Taste AI</title>
+    <link rel="stylesheet" href="styleHomePage.css">
+    <link rel="icon" type="image/png" href="./foodLogos/icons8-apple-fruit-48.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <div class="container" id="container">
+        <!-- Loading Indicator -->
+        <div id="loadingIndicator" class="loading-indicator">
+            <div class="loading-content">
+                <div class="loading-spinner"></div>
+                <h3>Generating your weekly menus...</h3>
+                <p>Please wait while we create your personalized menus</p>
+            </div>
+        </div>
+
+        <!-- Success Message -->
+        <div id="successMessage" class="success-message">
+            <div class="success-content">
+                <div class="success-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h3>Menus Generated!</h3>
+                <p>Your weekly menus have been created successfully.</p>
+            </div>
+        </div>
+
+        <!-- User Icon and Dropdown -->
+        <div class="user-menu">
+            <div class="user-icon" id="userIcon">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="dropdown-menu" id="dropdownMenu">
+                <div class="menu-item" id="addDetails">
+                    <i class="fas fa-user-edit"></i>
+                    <span>Add Details</span>
+                </div>
+                <div class="menu-item" id="logOut">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Log Out</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content: Landing Page -->
+        <div class="main-content landing">
+            <!-- Hero Section -->
+            <section class="hero-section">
+                <div class="hero-content">
+                    <h1>Eat smarter with Taste AI</h1>
+                    <p>Personalized, balanced meal plans tailored to your goals and preferences.</p>
+                    <a href="#" id="ctaCompleteProfile" class="btn btn-primary">
+                        <i class="fas fa-user-check"></i>
+                        Complete your profile
+                    </a>
+                </div>
+            </section>
+            
+            <!-- Information Cards Section -->
+            <section class="cards-section">
+                <div class="info-cards">
+                    <!-- What is Taste AI Card -->
+                    <div class="info-card">
+                        <div class="card-header card-header--about">
+                            <i class="fas fa-lightbulb"></i>
+                            <h3>What is Taste AI?</h3>
+                        </div>
+                        <div class="card-content">
+                            <p>An intelligent nutrition platform that uses AI to create personalized meal plans based on your health data, lifestyle, and goals.</p>
+                        </div>
+                    </div>
+
+                    <!-- Our Mission Card -->
+                    <div class="info-card">
+                        <div class="card-header card-header--mission">
+                            <i class="fas fa-target"></i>
+                            <h3>Our Mission</h3>
+                        </div>
+                        <div class="card-content">
+                            <p>Making healthy eating simple and accessible for everyone through AI-powered, science-based nutrition recommendations.</p>
+                        </div>
+                    </div>
+
+                    <!-- What You Get Card -->
+                    <div class="info-card">
+                        <div class="card-header card-header--features">
+                            <i class="fas fa-gift"></i>
+                            <h3>What You Get</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="feature-list">
+                                <div class="feature-item">
+                                    <i class="fas fa-bowl-food icon--orange"></i>
+                                    <span>Smart nutrition recommendations</span>
+                                </div>
+                                <div class="feature-item">
+                                    <i class="fas fa-fire icon--red"></i>
+                                    <span>Personalized calorie insights</span>
+                                </div>
+                                <div class="feature-item">
+                                    <i class="fas fa-seedling icon--green"></i>
+                                    <span>Balanced meal plans</span>
+                                </div>
+                                <div class="feature-item">
+                                    <i class="fas fa-edit icon--purple"></i>
+                                    <span>Interactive menu customization</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- How It Works Card -->
+                    <div class="info-card">
+                        <div class="card-header card-header--process">
+                            <i class="fas fa-cogs"></i>
+                            <h3>How It Works</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="steps-list">
+                                <div class="step-item">
+                                    <span class="step-num step-num--blue">1</span>
+                                    <div>
+                                        <h4>Complete your profile</h4>
+                                        <p>Add your health data & preferences</p>
+                                    </div>
+                                </div>
+                                <div class="step-item">
+                                    <span class="step-num step-num--red">2</span>
+                                    <div>
+                                        <h4>AI analyzes your needs</h4>
+                                        <p>Algorithms compute your targets</p>
+                                    </div>
+                                </div>
+                                <div class="step-item">
+                                    <span class="step-num step-num--green">3</span>
+                                    <div>
+                                        <h4>Get your menu</h4>
+                                        <p>Receive personalized recommendations</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</body>
+<script type ="module" src="logicHomePage.js"></script>
+</html>

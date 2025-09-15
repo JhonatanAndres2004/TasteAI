@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taste AI Login</title>
+    <link rel="icon" type="image/png" href="./foodLogos/icons8-apple-fruit-48.png">
+    <link rel="stylesheet" href="./styleLogin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="particles-container" id="particles"></div>
+    
+    <div class="login-container">
+        <div class="glass-form">
+            <div class="form-header">
+                <i class="fas fa-user-circle"></i>
+                <h2>Taste AI</h2>
+                <p class="form-subtitle">Sign in to your account</p>
+            </div>
+            
+            <form class="login-form" id="authForm">
+                <!-- Login Fields -->
+                <div class="form-fields login-fields">
+                    <div class="form-group">
+                        <div class="input-wrapper">
+                            <i class="fas fa-envelope"></i>
+                            <input type="email" name="email" id="signInEmail" placeholder="Email" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="input-wrapper">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" name="password" id="signInPassword" placeholder="Password" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-options">
+                        <a href="#" class="forgot-link">Forgot Password?</a>
+                    </div>
+                </div>
+
+                <!-- Sign-up Fields -->
+                <div class="form-fields signup-fields" style="display: none;">
+                    <div class="form-group">
+                        <div class="input-wrapper">
+                            <i class="fas fa-user"></i>
+                            <input type="text" name="name" id="signUpName" placeholder="Full Name" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="input-wrapper">
+                            <i class="fas fa-envelope"></i>
+                            <input type="email" name="signup-email" id="signUpEmail" placeholder="Email" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="input-wrapper">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" name="signup-password" id="signUpPassword" placeholder="Password" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="input-wrapper">
+                            <i class="fas fa-birthday-cake"></i>
+                            <input type="number" name="age" placeholder="Age" id="signUpAge" min="14" max="80" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="input-wrapper">
+                            <i class="fas fa-venus-mars"></i>
+                            <select name="sex" id="signUpSex" required>
+                                <option value="" disabled selected>Select Sex</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Sign In Button -->
+                <button type="submit" class="auth-btn signin-btn" id="sendFormSignIn">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span class="btn-text">Sign In</span>
+                </button>
+
+                <!-- Sign Up Button -->
+                <button type="submit" class="auth-btn signup-btn" id="sendFormSignUp" style="display: none;">
+                    <i class="fas fa-user-plus"></i>
+                    <span class="btn-text">Sign Up</span>
+                </button>
+                
+                <div class="auth-link">
+                    <p class="auth-text">Don't have an account? <a href="#" class="toggle-form">Sign up</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script src="./logicStyleLogin.js"></script>
+    <script type="module" src="./logicForms.js"></script>
+
+</body>
+</html>

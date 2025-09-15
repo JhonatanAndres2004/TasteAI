@@ -1,0 +1,886 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #f7fafc 0%, #e3e9f3 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    position: relative;
+    overflow-x: hidden;
+    padding: 20px;
+    padding-top: 100px;
+}
+
+/* Particles Container */
+.particles-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Return Button */
+.return-btn {
+    position: fixed;
+    top: 30px;
+    left: 30px;
+    width: 50px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 10;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.return-btn:hover {
+    transform: translateX(-3px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.return-btn i {
+    color: #009FE2;
+    font-size: 1.2rem;
+}
+
+/* Container */
+.container {
+    position: relative;
+    z-index: 2;
+    width: 70%;
+    max-width: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 auto;
+}
+
+/* Profile Title */
+.profile-title {
+    text-align: left;
+    margin-bottom: 30px;
+    width: 100%;
+    padding-left: 20px;
+}
+
+.profile-title h1 {
+    font-size: 2.5rem;
+    font-weight: 600;
+    color: #222;
+    margin: 0;
+    letter-spacing: -1px;
+    background: linear-gradient(135deg, #009FE2 0%, #86e3ce 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 2px 10px rgba(0, 159, 226, 0.1);
+}
+
+/* Center the profile photo field in the basic info section */
+.center-photo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+.center-photo label {
+    margin-bottom: 8px;
+    text-align: center;
+}
+
+/* Profile Card */
+.profile-card {
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 25px 45px rgba(0, 0, 0, 0.08);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 100%;
+    margin-bottom: 30px;
+}
+
+.profile-card:last-child {
+    margin-bottom: 0;
+}
+
+.profile-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%);
+    border-radius: 20px;
+    z-index: -1;
+}
+
+/* Form Header */
+.form-header {
+    text-align: center;
+    margin-bottom: 30px;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.form-header i {
+    font-size: 3rem;
+    color: #009FE2;
+    margin-bottom: 15px;
+    display: block;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.form-header h2 {
+    color: #222;
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.form-subtitle {
+    color: #555;
+    font-size: 0.95rem;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Form Groups */
+.form-group {
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: #555;
+    font-size: 1rem;
+    margin-bottom: 8px;
+    display: block;
+}
+
+/* Input Wrapper */
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-wrapper i {
+    position: absolute;
+    left: 15px;
+    color: #009FE2;
+    font-size: 1.1rem;
+    z-index: 2;
+    transition: all 0.3s ease;
+}
+
+.input-wrapper input,
+.input-wrapper select {
+    width: 100%;
+    padding: 15px 15px 15px 45px;
+    background: rgba(255,255,255,0.7);
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 12px;
+    color: #222;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(5px);
+    font-family: inherit;
+}
+
+.input-wrapper select {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23009FE2' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 16px;
+    padding-right: 45px;
+}
+
+.input-wrapper input::placeholder {
+    color: #888;
+}
+
+.input-wrapper input:focus,
+.input-wrapper select:focus {
+    outline: none;
+    border-color: #009FE2;
+    box-shadow: 0 0 0 3px rgba(0, 159, 226, 0.08);
+    background: rgba(255,255,255,0.9);
+}
+
+/* Photo Upload Section - Compact */
+.photo-group {
+    margin-bottom: 30px;
+}
+
+.photo-upload-container.compact {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    background: rgba(255,255,255,0.7);
+    border-radius: 15px;
+    border: 1px solid rgba(0,0,0,0.08);
+    backdrop-filter: blur(5px);
+    max-width: 300px;
+}
+
+.photo-preview {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border: 2px solid rgba(0, 159, 226, 0.2);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    position: relative;
+    flex-shrink: 0;
+}
+
+.default-avatar {
+    font-size: 2rem;
+    color: #009FE2;
+}
+
+.photo-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.photo-upload-controls {
+    flex: 1;
+}
+
+.edit-photo-btn {
+    background: linear-gradient(135deg, #009FE2 0%, #86e3ce 100%);
+    color: white;
+    border: none;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 159, 226, 0.2);
+}
+
+.edit-photo-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(0, 159, 226, 0.3);
+}
+
+/* Section Containers */
+.section-container {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 15px;
+    margin-bottom: 25px;
+    overflow: hidden;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    backdrop-filter: blur(5px);
+}
+
+.section-header-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    background: rgba(255, 255, 255, 0.5);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.section-header-main:hover {
+    background: rgba(255, 255, 255, 0.7);
+}
+
+.section-header-main h3 {
+    color: #222;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.toggle-btn {
+    background: none;
+    border: none;
+    color: #009FE2;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.toggle-btn:hover {
+    background: rgba(0, 159, 226, 0.1);
+    transform: scale(1.1);
+}
+
+.toggle-btn.rotated {
+    transform: rotate(180deg);
+}
+
+.section-content {
+    padding: 25px;
+    transition: all 0.3s ease;
+    max-height: 1000px;
+    opacity: 1;
+    overflow: hidden;
+}
+
+.section-content.collapsed {
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    opacity: 0;
+}
+
+/* Form Grid */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+/* Section Headers with Add Buttons */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 12px 15px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.section-header label {
+    font-weight: 600;
+    color: #333;
+    font-size: 1rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.section-header label i {
+    color: #009FE2;
+    font-size: 1.1rem;
+}
+
+.add-btn {
+    background: #28a745;
+    color: white;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
+}
+
+.add-btn:hover {
+    background: #218838;
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.3);
+}
+
+/* Dynamic Fields */
+.dynamic-field {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    animation: slideIn 0.3s ease;
+}
+
+.dynamic-field input {
+    flex: 1;
+    padding: 12px 15px 12px 45px;
+    background: rgba(255,255,255,0.7);
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 10px;
+    color: #222;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(5px);
+    font-family: inherit;
+}
+
+.dynamic-field input:focus {
+    outline: none;
+    border-color: #009FE2;
+    box-shadow: 0 0 0 3px rgba(0, 159, 226, 0.08);
+    background: rgba(255,255,255,0.9);
+}
+
+.remove-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.2);
+}
+
+.remove-btn:hover {
+    background: #c82333;
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(220, 53, 69, 0.3);
+}
+
+/* Submit Button */
+.submit-btn {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, #009FE2 0%, #86e3ce 100%);
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-family: inherit;
+    box-shadow: 0 8px 25px rgba(0, 159, 226, 0.15);
+}
+
+.submit-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 35px rgba(0, 159, 226, 0.25);
+}
+
+.submit-btn:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.submit-btn:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: 0 4px 15px rgba(108, 117, 125, 0.2);
+}
+
+/* Animations */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Error Messages */
+.error-message {
+    color: #e74c3c;
+    font-size: 0.9rem;
+    margin-top: 5px;
+    display: none;
+}
+
+.form-group.error .input-wrapper input,
+.form-group.error .input-wrapper select {
+    border-color: #e74c3c;
+}
+
+.form-group.error .error-message {
+    display: block;
+}
+
+/* Validation Feedback Styles */
+.validation-feedback {
+    margin-top: 0;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    animation: slideIn 0.3s ease;
+    line-height: 1.4;
+    border: 2px solid transparent;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.validation-feedback i {
+    margin-right: 6px;
+    font-size: 0.85rem;
+}
+
+.validation-feedback .valid {
+    color: #059669;
+    background-color: #d1fae5;
+    border: 1px solid #a7f3d0;
+}
+
+.validation-feedback .valid i {
+    color: #059669;
+}
+
+.validation-feedback .warning {
+    color: #d97706;
+    background-color: #fef3c7;
+    border: 1px solid #fcd34d;
+}
+
+.validation-feedback .warning i {
+    color: #d97706;
+}
+
+.validation-feedback .error {
+    color: #dc2626;
+    background-color: #fee2e2;
+    border: 1px solid #fca5a5;
+}
+
+.validation-feedback .error i {
+    color: #dc2626;
+}
+
+/* Report Button Styles */
+.report-btn {
+    background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+    margin-top: 20px;
+    animation: slideIn 0.5s ease;
+}
+
+.report-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #047857 0%, #059669 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(5, 150, 105, 0.3);
+}
+
+.report-btn i {
+    color: #ffffff;
+}
+
+/* Enhanced dynamic field styles for better feedback display */
+.dynamic-field {
+    position: relative;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+}
+
+.dynamic-field .input-wrapper {
+    flex: 1;
+}
+
+.dynamic-field .remove-btn {
+    flex-shrink: 0;
+}
+
+.dynamic-field .validation-feedback {
+    flex: 0 0 250px;
+    margin-top: 0;
+    align-self: flex-start;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Report header variant */
+.report-section-header {
+    background: rgba(255, 248, 232, 0.9); /* light creamy */
+    border-bottom: 1px solid rgba(255, 193, 7, 0.25);
+    transition: background 0.25s ease, transform 0.2s ease;
+}
+
+.report-section-header h3 {
+    color: #6b4f1d; /* warm brown */
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.report-section-header i {
+    color: #f59e0b; /* amber */
+}
+
+.section-container:hover .report-section-header {
+    background: rgba(255, 248, 232, 1);
+}
+
+/* Scrollable list for report sections */
+.report-list {
+    max-height: 180px;
+    overflow: auto;
+    padding-left: 18px;
+    list-style: disc;
+}
+
+.report-list li {
+    margin: 6px 0;
+}
+
+/* Subgrid spacing tweak for report areas */
+.report-subgrid {
+    gap: 20px;
+}
+
+/* Separate card styling for report */
+.report-card {
+    margin-top: 25px;
+}
+
+/* Color variants */
+.report-section-header--calories {
+    background: rgba(255, 248, 232, 0.9);
+    border-bottom-color: rgba(255, 193, 7, 0.25);
+}
+
+.report-section-header--water {
+    background: rgba(232, 246, 255, 0.9);
+    border-bottom-color: rgba(59, 130, 246, 0.25);
+}
+
+.report-section-header--protein {
+    background: rgba(255, 236, 234, 0.9);
+    border-bottom-color: rgba(244, 63, 94, 0.25);
+}
+
+.report-section-header--fats {
+    background: rgba(255, 240, 245, 0.9);
+    border-bottom-color: rgba(236, 72, 153, 0.25);
+}
+
+.report-section-header--carbs {
+    background: rgba(240, 249, 255, 0.9);
+    border-bottom-color: rgba(14, 165, 233, 0.25);
+}
+
+.report-section-header--foods {
+    background: rgba(236, 253, 245, 0.9);
+    border-bottom-color: rgba(16, 185, 129, 0.25);
+}
+
+.report-section-header--general {
+    background: rgba(245, 243, 255, 0.9);
+    border-bottom-color: rgba(139, 92, 246, 0.25);
+}
+
+/* Taller list for general recommendations */
+.report-list--tall {
+    max-height: 240px;
+}
+
+/* Responsive Design */
+@media (max-width: 1100px) {
+    .container {
+        width: 80%;
+    }
+}
+@media (max-width: 768px) {
+    body {
+        padding-top: 80px;
+    }
+    
+    .container {
+        width: 95%;
+        padding-left: 0;
+        padding-right: 0;
+    }
+    
+    .profile-title {
+        padding-left: 10px;
+    }
+    
+    .profile-title h1 {
+        font-size: 1.8rem;
+    }
+    
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .profile-card {
+        padding: 20px;
+        margin: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .photo-upload-container.compact {
+        max-width: 100%;
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
+    }
+    
+    .photo-preview {
+        width: 70px;
+        height: 70px;
+    }
+    
+    .default-avatar {
+        font-size: 2rem;
+    }
+    
+    .form-header h2 {
+        font-size: 1.5rem;
+    }
+    
+    .return-btn {
+        top: 20px;
+        left: 20px;
+        width: 45px;
+        height: 45px;
+    }
+    
+    .section-header-main {
+        padding: 15px 20px;
+    }
+    
+    .section-content {
+        padding: 20px;
+    }
+    
+    .section-header {
+        padding: 10px 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        padding-top: 70px;
+    }
+    
+    .profile-title h1 {
+        font-size: 1.5rem;
+    }
+    
+    .profile-card {
+        padding: 15px;
+    }
+    
+    .input-wrapper input,
+    .input-wrapper select {
+        padding: 12px 12px 12px 40px;
+    }
+    
+    .submit-btn {
+        padding: 12px 24px;
+        font-size: 0.95rem;
+    }
+    
+    .section-header-main h3 {
+        font-size: 1.1rem;
+    }
+}
+
+/* Responsive adjustments for validation feedback */
+@media (max-width: 768px) {
+    .validation-feedback {
+        font-size: 0.85rem;
+        padding: 8px 10px;
+    }
+    
+    .dynamic-field {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .dynamic-field .validation-feedback {
+        flex: none;
+        width: 100%;
+        margin-top: 0;
+    }
+    
+    .dynamic-field .remove-btn {
+        align-self: flex-end;
+        margin-top: -40px;
+        margin-right: 10px;
+    }
+}
+
+/* Base report header icon color for contrast */
+.report-section-header h3 i {
+    filter: none;
+}
+
+/* Variant hovers using slightly darker shades */
+.section-container:hover .report-section-header--calories {
+    background: rgba(252, 237, 199, 0.95);
+}
+.section-container:hover .report-section-header--water {
+    background: rgba(210, 236, 255, 0.95);
+}
+.section-container:hover .report-section-header--protein {
+    background: rgba(255, 226, 222, 0.95);
+}
+.section-container:hover .report-section-header--fats {
+    background: rgba(255, 230, 240, 0.95);
+}
+.section-container:hover .report-section-header--carbs {
+    background: rgba(200, 235, 255, 0.95);
+}
+.section-container:hover .report-section-header--foods {
+    background: rgba(208, 248, 232, 0.95);
+}
+.section-container:hover .report-section-header--general {
+    background: rgba(232, 228, 255, 0.95);
+}
+
+/* Icon colors per section for contrast */
+.report-section-header--calories h3 i { color: #d97706; }
+.report-section-header--water h3 i { color: #2563eb; }
+.report-section-header--protein h3 i { color: #dc2626; }
+.report-section-header--fats h3 i { color: #be185d; }
+.report-section-header--carbs h3 i { color: #0284c7; }
+.report-section-header--foods h3 i { color: #059669; }
+.report-section-header--general h3 i { color: #6d28d9; }

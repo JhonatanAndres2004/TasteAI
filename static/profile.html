@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - TasteAI</title>
+    <link rel="stylesheet" href="styleProfile.css">
+    <link rel="icon" type="image/png" href="./foodLogos/icons8-apple-fruit-48.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <div class="particles-container" id="particles"></div>
+    
+    <div class="container">
+        <!-- Return Button -->
+        <div class="return-btn" onclick="goToHomepage()">
+            <i class="fas fa-arrow-left"></i>
+        </div>
+        
+        <!-- Title on top of container -->
+        <div class="profile-title">
+            <h1>Profile Settings</h1>
+        </div>
+        
+        <!-- Basic Information Form -->
+        <div class="profile-card">
+            <form id="basicInformationForm" class="profile-form">
+                <div class="form-header">
+                    <h2>Basic Information</h2>
+                    <p class="form-subtitle">Please fill in all required fields to complete your profile</p>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <div class="input-wrapper">
+                            <i class="fas fa-user"></i>
+                            <input type="text" id="name" name="name" placeholder="Name" required minlength="6" maxlength="25">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="input-wrapper">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" id="password" name="password" placeholder="Current or new password" required minlength="8" maxlength="30">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="input-wrapper">
+                            <i class="fas fa-venus-mars"></i>
+                            <select id="sex" name="sex" required>
+                                <option value="">Select Sex</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="input-wrapper">
+                            <i class="fas fa-birthday-cake"></i>
+                            <input type="number" id="age" name="age" placeholder="Age" required min="18" max="100">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="input-wrapper">
+                            <i class="fas fa-weight"></i>
+                            <input type="number" id="weight" name="weight" placeholder="Weight (kg)" step="0.1" min="10" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="input-wrapper">
+                            <i class="fas fa-ruler-vertical"></i>
+                            <input type="number" id="height" name="height" placeholder="Height (cm)" step="0.1" min="50" required>
+                        </div>
+                    </div>
+                    <div class="form-group full-width">
+                        <div class="input-wrapper">
+                            <i class="fas fa-bullseye"></i>
+                            <select id="objective" name="objective" required>
+                                <option value="">Select Objective</option>
+                                <option value="Weight Loss">Weight Loss</option>
+                                <option value="Muscle Gain">Muscle Gain</option>
+                                <option value="Maintenance">Maintenance</option>
+                                <option value="Fitness">Fitness</option>
+                                <option value="Health">Health</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="form-group">
+                    <button type="submit" id="basicSubmitBtn" class="submit-btn" disabled>
+                        <i class="fas fa-check-circle"></i>
+                        <span>Save Basic Information</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Additional Information Form -->
+        <div class="profile-card">
+            <form id="additionalInformationForm" class="profile-form">
+                <div class="form-header">
+                    <h2>Additional Information</h2>
+                    <p class="form-subtitle">Add optional details to get personalized AI suggestions</p>
+                </div>
+                
+                <!-- Allergies Section -->
+                <div class="form-group">
+                    <div class="section-header">
+                        <label><i class="fas fa-allergies"></i> Allergies</label>
+                        <button type="button" class="add-btn" onclick="addAllergyField()">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    <div id="allergiesContainer">
+                        <!-- Allergy fields will be added here dynamically -->
+                    </div>
+                </div>
+                
+                <!-- Sportive Description Section -->
+                <div class="form-group">
+                    <div class="section-header">
+                        <label><i class="fas fa-running"></i> Sportive Description</label>
+                        <button type="button" class="add-btn" onclick="addSportiveField()">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    <div id="sportiveContainer">
+                        <!-- Sportive description fields will be added here dynamically -->
+                    </div>
+                </div>
+                
+                <!-- Medical Conditions Section -->
+                <div class="form-group">
+                    <div class="section-header">
+                        <label><i class="fas fa-heartbeat"></i> Medical Conditions</label>
+                        <button type="button" class="add-btn" onclick="addMedicalField()">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    <div id="medicalContainer">
+                        <!-- Medical condition fields will be added here dynamically -->
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="form-group">
+                    <button type="submit" id="additionalSubmitBtn" class="submit-btn" disabled>
+                        <i class="fas fa-magic"></i>
+                        <span>Get AI Suggestion</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script type="module" src="logicProfile.js"></script>
+</body>
+</html>
