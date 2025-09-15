@@ -8,7 +8,7 @@ from openai import OpenAI
 import json
 from datetime import datetime
 from typing import Optional, Dict, Any
-
+from processingAgent import MultiLLMService
 load_dotenv()
 
 """
@@ -64,7 +64,13 @@ mydb= DBConnect()
 if mydb is None:
     print("ERROR: Database connection failed. Please check your environment variables and database configuration.")
 
-
+#Now initialize the processing agent
+AIAgent = MultiLLMService([])
+AIAgent.providers = [
+    AIAgent.openai_provider,
+    AIAgent.gemini_provider,
+    AIAgent.anthropic_provider
+]
 
 def createUsersTable():
     """
@@ -607,9 +613,6 @@ def getAISuggestion(additionalInformationUser:AdditionalInformationUser):
         Your output MUST contain exactly 3 allergy objects, 2 sportive objects, and 1 medical condition object.
     """
     
-
-    # Initialize OpenAI client
-    client=OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
     # Convert input to string if it's a dict
     if isinstance(additionalInformationUser, dict):
         additionalInformationUser_str = json.dumps(additionalInformationUser, indent=2)
@@ -631,16 +634,8 @@ def getAISuggestion(additionalInformationUser:AdditionalInformationUser):
     
     try:
         # Make API call
-        response = client.chat.completions.create(
-            model="gpt-4",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.1  # Low temperature for consistent output
-        )
-        
-        # Parse the response as JSON
-        result = response.choices[0].message.content.strip()
-        print(result)
-        return json.loads(result)
+        response = AIAgent.getLLMResponse(prompt)
+        return response
         
     except Exception as e:
         print(f"Error: {e}")
@@ -754,25 +749,14 @@ def getDetailedReport(id:int):
     
     KEY ASPECT: Only return the JSON schema required. Do not add text before or after it. This is fundamental
     """
-    
-    # Initialize OpenAI client
-    client=OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
-    
+    print(prompt)
     try:
         # Make API call
-        response = client.chat.completions.create(
-            model="gpt-4",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.1  # Low temperature for consistent output
-        )
-        
-        # Parse the response as JSON
-        result = response.choices[0].message.content.strip()
-        #If the LLM request succeeds, save it to the DB
-        saveToDatabase=saveDetailedReport(json.loads(result),id)
+        response = AIAgent.getLLMResponse(prompt)
+        saveToDatabase=saveDetailedReport(response,id)
         print(saveToDatabase)
 
-        return json.loads(result)
+        return response
         
     except Exception as e:
         print(f"Error: {e}")
@@ -957,28 +941,16 @@ def getWeeklyMenus(id:int):
         REMEMBER THE TOTAL OF CALORIES, PROTEIN, FATS AND CARBOHYDRATES FOR EACH DAY MUST BE WITHIN THE 5% RANGE OF THE DAILY TARGETS. IF THEY DO NOT COMPLY, THE USER COULD SUFFER HEALTH PROBLEMS. IT IS YOUR RESPONSIBILITY TO ENSURE THAT THE DAILY TOTALS ARE CORRECT. IF YOU CANNOT PROVIDE A MENU THAT COMPLIES WITH THIS REQUIREMENT, RETURN AN EMPTY JSON SCHEMA. ORGANIZE THE MEALS AND DO EVERYTHING TO ACCOMPLISH THIS REQUIREMENT, WITHOUT IT, THE RESPONSE IS USELESS.
         """
 
-    
-    
-    # Initialize OpenAI client
-    client=OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
-    print(prompt)
     try:
         # Make API call
-        response = client.chat.completions.create(
-            model="gpt-4",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.3  # Low temperature for consistent output
-        )
-        
-        # Parse the response as JSON
-        result = response.choices[0].message.content.strip()
+        response = AIAgent.getLLMResponse(prompt)
         #If the LLM request succeeds, save it to the DB'
 
         #Save results as object. JSON format is useful to divide context by days
-        saveToDatabase=saveWeeklyMenus(json.loads(result),id)
+        saveToDatabase=saveWeeklyMenus(response,id)
         print(saveToDatabase)
 
-        return json.loads(result)
+        return response
         
     except Exception as e:
         print(f"Error: {e}")
@@ -1222,28 +1194,17 @@ def getDailyModifiedMenu(id:int, day:int, userRequest:str):
     9. If the user request is vague and you don't have enough information to make a modification, return the day{day} key empty and explain in the notes section what information is mising so the user can provide it. Some examples of vague requests are : "I want to eat something different today", "I want to add a meal", "I want to remove a meal", "I want to change a meal", etc. These requests are too vague and you don't have enough information to make a modification. In that case, return an empty day{day} key and explain the situation in the notes section.
     """
 
-    #Initialize OpenAI client
-    client=OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
-
     #Make API call
     try:
-        response = client.chat.completions.create(
-            model="gpt-4",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.3  # Low temperature for consistent output
-        )
-        
-        #Parse the response as JSON
-        result = response.choices[0].message.content.strip()
-        print(result)
+        response = AIAgent.getLLMResponse(prompt)
         #Check if the day{day} key is empty
-        result_json=json.loads(result)
+        result_json=response
         if result_json[f"day{day}"]:
             #If the LLM request succeeds, save it to the DB
-            saveModifiedDailyMenu(id, day, json.loads(result))
+            saveModifiedDailyMenu(id, day, response)
         else:
             print(f"No changes made to the menu for user {id} and day {day} due to vague user request")
-        return json.loads(result)
+        return response
     
     except Exception as e:
         print(f"Error: {e}")
