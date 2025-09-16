@@ -31,9 +31,9 @@ class User(BaseModel):
     recommended_protein_intake: float|None = Field(default=None)
     recommended_fats_intake: float|None = Field(default=None)
     recommended_carbohydrates_intake: float|None = Field(default=None)
-    recommended_food: str|None = Field(default=None)
+    nutritional_deficiency_risks: str|None = Field(default=None)
     general_recommendation:str|None = Field(default=None)
-
+    country: str|None = Field(default=None)
     weekly_calories: str|None = Field(default=None)
     weekly_protein: str|None = Field(default=None)
     weekly_fats: str|None = Field(default=None)
@@ -59,7 +59,8 @@ class BasicInformationUser(BaseModel):
     objective: Objectives|None = Field(default=None)
     weight: float|None = Field(default=None, ge=10.0)
     height: float|None = Field(default=None, ge=50.0)
-
+    country: str|None = Field(default=None)
+    
 class AdditionalInformationUser(BaseModel):
     id: int|None = Field(default=None)
     allergies: list[str] |None = Field(default=None)

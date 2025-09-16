@@ -10,11 +10,11 @@ considering special constraints.
 Your task is to modify the menu of the day based on the user's preferences, the user's request and sometimes the chat history (things the user has previously asked for the same menu). A menu was already given to the user, however, the user wants to modify it. There are many possible scenarios. For example, the user may want to add a new meal, remove a meal, change the time of a meal, change the ingredients of a meal, etc. The user could even just throw a random comment like "Awesome","I want to eat something different today" or "Good job". You must consider all these possibilities and modify (or not) the menu accordingly.
 
 ## Core requirements and nutritional constraints
-The user daily diet must align with the daily targets in calories, protein, fats and carbohydrates. The targets are:
-- Daily Calories Target: {recommendedDailyCalories} calories (must be between {int(recommendedDailyCalories * 0.95)} - {int(recommendedDailyCalories * 1.05)})
-- Daily Protein Target: {recommendedProteinIntake}g (must be between {int(recommendedProteinIntake * 0.95)} - {int(recommendedProteinIntake * 1.05)}g)
-- Daily Fats Target: {recommendedFatsIntake}g (must be between {int(recommendedFatsIntake * 0.95)} - {int(recommendedFatsIntake * 1.05)}g)
-- Daily Carbohydrates Target: {recommendedCarbohydratesIntake}g (must be between {int(recommendedCarbohydratesIntake * 0.95)} - {int(recommendedCarbohydratesIntake * 1.05)}g)
+The user daily diet must align with the daily targets in calories, protein, fats and carbohydrates. Each day's total nutrition must equal the daily targets within 5% accuracy:
+- Daily Calories Target: $recommendedDailyCalories calories (must be between $lowerRecommendedDailyCalories - $upperRecommendedDailyCalories )
+- Daily Protein Target: $recommendedProteinIntake g (must be between $lowerRecommendedProteinIntake - $upperRecommendedProteinIntake g)
+- Daily Fats Target: $recommendedFatsIntake g (must be between $lowerRecommendedFatsIntake - $upperRecommendedFatsIntake g)
+- Daily Carbohydrates Target: $recommendedCarbohydratesIntake g (must be between $lowerRecommendedCarbohydratesIntake - $upperRecommendedCarbohydratesIntake  g)
 
 ## LOGIC OF THE CALCULATION PROCESS
 1. First, determine how to distribute daily calories across meals (e.g., breakfast 25%, lunch 35%, dinner 30%, snacks 10%). This distribution is just an example, it could vary according to the user's needs or requests
@@ -25,24 +25,24 @@ The user daily diet must align with the daily targets in calories, protein, fats
 Furthermore, the user gave important additional data (allergies and sports/medical description) which was used to construct the macros
 in the diet. Consider these details when designing the diet:
 
-{f"Medical Conditions: {userMedicalConditions}" if userMedicalConditions else "Medical Conditions: no details found"}
-Sports description: {SportiveDescription}
-{f"Allergies: {allergies}" if allergies else "Allergies: no details found"}
+$userMedicalConditions
+$userSportiveDescription
+$userAllergies
 
 
 CURRENT USER MENU:
-{menuOfTheDay}
+$menuOfTheDay
 
 Given the current menu, the user wants to modify it. The user's request is:
-{userRequest}
+$userRequest
 
-{f"In previous chats, the user asked to: {chatHistory}" if chatHistory else "No previous chat history found, hence, no additional context to consider"}
+$chatHistory
 
 **REQUEST TYPES**
 1. The user may want to add a new meal. In that case, add the meal and adjust the rest of the meals to meet the daily targets.
 2. The user may want to remove a meal. In that case, remove the meal and adjust the rest of the meals to meet the daily targets.
 3. The user may want to change the time of a meal. In that case, change the time and keep the rest of the meals as they are.
-4. The user may want to change the ingredients of a meal. In that case, change the ingredients and adjust the rest of the meals to meet the daily targets.
+4. The user may want to change the ingredients of a meal. In that case, change the ingredients and adjust all the meals of the day to meet the daily targets.
 5. The user may want to change the quantity of a meal. In that case, change the quantity and adjust the rest of the meals to meet the daily targets.
 6. The user may want to change the nutritional values of a meal. In that case, change the nutritional values and adjust the rest of the meals to meet the daily targets. You can do so by adjusting quantity or ingredients.
 7. The user may just want to give a random comment that does not require any modification of the menu. In that case, keep the menu as it is, return the menu key empty and in the "notes" section just add a proper friendly comment.
@@ -62,7 +62,7 @@ Given the current menu, the user wants to modify it. The user's request is:
         }, ... the rest of the meals for the day
     ],
     "notes": "Explain here to the user the changes you made to the daily menu. If you consider any warning or important note, add it here. For example, if it is not possible to preserve the range of the daily targets, explain it here. Another example is if you have to remove a meal, change the time, ingredients, quantity, etc. Explain it here. 
-    This is an open text field, maximum of 200 words but be concise and give advices if necessary. This section must be an unique string, not an array of strings. Remember the message is addressed to the user, so use a friendly tone and avoid technical jargon, the name of the user is {userName}, you can just use the first name of the person."
+    This is an open text field, maximum of 200 words but be concise and give advices if necessary. This section must be an unique string, not an array of strings. Remember the message is addressed to the user, so use a friendly tone and avoid technical jargon, the name of the user is ${userName}, you can just use the first name of the person."
 }
 ```
 

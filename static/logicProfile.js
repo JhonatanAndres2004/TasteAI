@@ -1293,7 +1293,7 @@ function renderDetailedReport(report) {
         const protein = toNumber(report.recommended_protein_intake);
         const fats = toNumber(report.recommended_fats_intake);
         const carbs = toNumber(report.recommended_carbohydrates_intake);
-        const foods = parseMaybeArray(report.recommended_food);
+        const nutritionalDeficiencyRisks = parseMaybeArray(report.nutritional_deficiency_risks);
         const general = parseMaybeArray(report.general_recommendation);
 
         // Metrics grid
@@ -1351,10 +1351,10 @@ function renderDetailedReport(report) {
             </div>
             <div class="section-container">
                 <div class="section-header-main report-section-header report-section-header--foods">
-                    <h3><i class="fas fa-utensils"></i> Recommended Foods</h3>
+                    <h3><i class="fas fa-utensils"></i> Nutritional Deficiency Risks </h3>
                 </div>
                 <div class="section-content">
-                    <ul class="report-list" style="text-align:left;color:#333">${foods.map(f => `<li>${f}</li>`).join('') || '<li>No items</li>'}</ul>
+                    <ul class="report-list" style="text-align:left;color:#333">${nutritionalDeficiencyRisks.map(f => `<li>${f}</li>`).join('') || '<li>No items</li>'}</ul>
                 </div>
             </div>
         `;
@@ -1410,7 +1410,7 @@ function checkForExistingReportData() {
             'recommended_protein_intake',
             'recommended_fats_intake',
             'recommended_carbohydrates_intake',
-            'recommended_food',
+            'nutritional_deficiency_risks',
             'general_recommendation'
         ];
 

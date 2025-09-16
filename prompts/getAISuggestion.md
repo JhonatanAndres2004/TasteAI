@@ -1,7 +1,7 @@
 Please verify and transform the following JSON data according to the instructions below.
 
 INPUT JSON:
-{additionalInformationUser_str}
+$additionalInformationUser_str
 
 TRANSFORMATION INSTRUCTIONS:
 
