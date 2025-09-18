@@ -4,6 +4,7 @@ import { UserManager } from './authManager.js';
 let allergyFields = [];
 let sportiveFields = [];
 let medicalFields = [];
+let foodPreferenceFields = [];
 
 // Track form states to detect changes
 let basicFormInitialState = {};
@@ -23,6 +24,7 @@ document.addEventListener('DOMContentLoaded', function() {
     setupEventListeners();
     addSportiveField(); // Add one sportive field by default
     addMedicalField(); // Add one medical field by default
+    addFoodPreferenceField(); // Add one food preference field by default
     obtainExistingData();
     captureInitialStates();
     validateBasicForm();
@@ -56,7 +58,8 @@ function updateAdditionalFormInitialState() {
     additionalFormInitialState = {
         allergies: [],
         sportive: [],
-        medical: []
+        medical: [],
+        foodPreferences: []
     };
     
     // Capture current dynamic fields
@@ -70,6 +73,10 @@ function updateAdditionalFormInitialState() {
     
     document.querySelectorAll('input[name="medical_conditions[]"]').forEach(input => {
         additionalFormInitialState.medical.push(input.value);
+    });
+    
+    document.querySelectorAll('input[name="food_preferences[]"]').forEach(input => {
+        additionalFormInitialState.foodPreferences.push(input.value);
     });
 }
 
@@ -85,6 +92,7 @@ function obtainExistingData() {
         document.getElementById('sex').value=userData.sex || '';
         document.getElementById('height').value = userData.height || '';
         document.getElementById('objective').value = userData.objective || '';
+        document.getElementById('country').value = userData.country || '';
         userId = userData.id; // Store user ID if available
         
         // Populate additional information fields if they exist
@@ -146,7 +154,7 @@ function addSportiveField() {
     fieldDiv.innerHTML = `
         <div class="input-wrapper">
             <i class="fas fa-running"></i>
-            <input type="text" id="${fieldId}" name="sportive_description[]" placeholder="Enter sportive description">
+            <input type="text" id="${fieldId}" name="sportive_description[]" placeholder="Enter sportive description: running every friday, swimming two times a week, etc">
         </div>
         <button type="button" class="remove-btn" onclick="removeField('${fieldId}', 'sportive')">
             <i class="fas fa-times"></i>
@@ -196,6 +204,35 @@ function addMedicalField() {
     additionalFormSubmitted = false;
 }
 
+function addFoodPreferenceField() {
+    const container = document.getElementById('foodPreferencesContainer');
+    const fieldId = `foodPreference_${foodPreferenceFields.length}`;
+    
+    const fieldDiv = document.createElement('div');
+    fieldDiv.className = 'dynamic-field';
+    fieldDiv.innerHTML = `
+        <div class="input-wrapper">
+            <i class="fas fa-utensils"></i>
+            <input type="text" id="${fieldId}" name="food_preferences[]" placeholder="Enter food preferences or dislike: vegan diet, I don't like pork, etc">
+        </div>
+        <button type="button" class="remove-btn" onclick="removeField('${fieldId}', 'foodPreference')">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    
+    container.appendChild(fieldDiv);
+    foodPreferenceFields.push(fieldId);
+    
+    // Add validation listener
+    const input = document.getElementById(fieldId);
+    input.addEventListener('input', validateAdditionalForm);
+    input.addEventListener('input', checkAdditionalFormChanges);
+    input.addEventListener('input', () => clearFeedbackOnInput(fieldId));
+    
+    // Mark that form has changed when new field is added
+    additionalFormSubmitted = false;
+}
+
 function removeField(fieldId, type) {
     const fieldElement = document.getElementById(fieldId);
     if (fieldElement) {
@@ -215,6 +252,9 @@ function removeField(fieldId, type) {
             case 'medical':
                 medicalFields = medicalFields.filter(id => id !== fieldId);
                 break;
+            case 'foodPreference':
+                foodPreferenceFields = foodPreferenceFields.filter(id => id !== fieldId);
+                break;
         }
         
         // Validate form after removal
@@ -230,7 +270,7 @@ function removeField(fieldId, type) {
 
 function setupRealTimeValidation() {
     // Add validation for required fields in basic form
-    const requiredFields = ['name', 'password', 'sex', 'age', 'weight', 'height', 'objective'];
+    const requiredFields = ['name', 'password', 'sex', 'age', 'weight', 'height', 'country', 'objective'];
     requiredFields.forEach(fieldName => {
         const field = document.getElementById(fieldName);
         if (field) {
@@ -294,6 +334,12 @@ function validateBasicField(event) {
                 errorMessage = 'Height must be at least 50 cm';
             }
             break;
+        case 'country':
+            if (!value) {
+                isValid = false;
+                errorMessage = 'Country is required';
+            }
+            break;
         case 'objective':
             if (!value) {
                 isValid = false;
@@ -340,7 +386,7 @@ function validateBasicForm() {
     let isValid = true;
     
     // Check required fields
-    const requiredFields = ['name', 'password', 'sex', 'age', 'weight', 'height', 'objective'];
+    const requiredFields = ['name', 'password', 'sex', 'age', 'weight', 'height', 'country', 'objective'];
     requiredFields.forEach(fieldName => {
         const field = document.getElementById(fieldName);
         if (field && !field.value.trim()) {
@@ -404,6 +450,7 @@ function hasAdditionalFormChanges() {
     const currentAllergies = [];
     const currentSportive = [];
     const currentMedical = [];
+    const currentFoodPreferences = [];
     
     document.querySelectorAll('input[name="allergies[]"]').forEach(input => {
         currentAllergies.push(input.value);
@@ -417,10 +464,15 @@ function hasAdditionalFormChanges() {
         currentMedical.push(input.value);
     });
     
+    document.querySelectorAll('input[name="food_preferences[]"]').forEach(input => {
+        currentFoodPreferences.push(input.value);
+    });
+    
     // Compare with initial state
     if (JSON.stringify(currentAllergies) !== JSON.stringify(additionalFormInitialState.allergies) ||
         JSON.stringify(currentSportive) !== JSON.stringify(additionalFormInitialState.sportive) ||
-        JSON.stringify(currentMedical) !== JSON.stringify(additionalFormInitialState.medical)) {
+        JSON.stringify(currentMedical) !== JSON.stringify(additionalFormInitialState.medical) ||
+        JSON.stringify(currentFoodPreferences) !== JSON.stringify(additionalFormInitialState.foodPreferences)) {
         return true;
     }
     
@@ -512,6 +564,7 @@ async function handleBasicFormSubmission(event) {
         sex: formData.get('sex'),
         weight: parseFloat(formData.get('weight')),
         height: parseFloat(formData.get('height')),
+        country: formData.get('country'),
         objective: formData.get('objective'),
         id: userId
     };
@@ -571,6 +624,7 @@ async function handleAdditionalFormSubmission(event) {
     const allergies = [];
     const sportiveDescriptions = [];
     const medicalConditions = [];
+    const foodPreferences = [];
     
     // Collect allergies
     document.querySelectorAll('input[name="allergies[]"]').forEach(input => {
@@ -593,11 +647,19 @@ async function handleAdditionalFormSubmission(event) {
         }
     });
     
+    // Collect food preferences
+    document.querySelectorAll('input[name="food_preferences[]"]').forEach(input => {
+        if (input.value.trim()) {
+            foodPreferences.push(input.value.trim());
+        }
+    });
+    
     // Create additional user data
     const additionalUserData = {
         allergies: allergies.length > 0 ? allergies : null,
         sportive_description: sportiveDescriptions,
-        medical_conditions: medicalConditions.length > 0 ? medicalConditions : null
+        medical_conditions: medicalConditions.length > 0 ? medicalConditions : null,
+        food_preferences: foodPreferences.length > 0 ? foodPreferences : null
     };
     //Add the user ID if available
     if (userId) {
@@ -745,6 +807,16 @@ function displayValidationFeedback(response) {
             }
         });
     }
+    
+    // Display food preferences feedback
+    if (response && response.food_preferences && Array.isArray(response.food_preferences)) {
+        response.food_preferences.forEach((foodPref, index) => {
+            const input = document.querySelectorAll('input[name="food_preferences[]"]')[index];
+            if (input) {
+                displayFieldFeedback(input, foodPref);
+            }
+        });
+    }
 }
 
 // Function to display feedback for a single field
@@ -868,6 +940,7 @@ async function showGetReportButton(validatedData) {
             const userAllergies = validatedData && validatedData.allergies && Array.isArray(validatedData.allergies) ? validatedData.allergies.map(item => item.original_version) : [];
             const userSportiveDescriptions = validatedData && validatedData.sportive_description && Array.isArray(validatedData.sportive_description) ? validatedData.sportive_description.map(item => item.original_version) : [];
             const userMedicalConditions = validatedData && validatedData.medical_conditions && Array.isArray(validatedData.medical_conditions) ? validatedData.medical_conditions.map(item => item.original_version) : [];
+            const userFoodPreferences = validatedData && validatedData.food_preferences && Array.isArray(validatedData.food_preferences) ? validatedData.food_preferences.map(item => item.original_version) : [];
 
             // Save user input data to localStorage
             const existingData = JSON.parse(localStorage.getItem('user_data') || '{}');
@@ -875,7 +948,8 @@ async function showGetReportButton(validatedData) {
                 ...existingData, 
                 allergies: userAllergies,
                 sportive_description: userSportiveDescriptions,
-                medical_conditions: userMedicalConditions
+                medical_conditions: userMedicalConditions,
+                food_preferences: userFoodPreferences
             };
             localStorage.setItem('user_data', JSON.stringify(updatedData));
 
@@ -961,6 +1035,7 @@ async function showGetReportButton(validatedData) {
                         recommended_water_intake:reportData.recommended_water_intake,
                         general_recommendation:reportData.general_recommendation,
                         recommended_food:reportData.recommended_food,
+                        nutritional_deficiency_risks:reportData.nutritional_deficiency_risks
                     };
 
                     const updatedUserData = { ...existingData, ...normalizedReport };
@@ -1061,6 +1136,12 @@ function validateBasicUserData(userData) {
         return false;
     }
     
+    // Validate country
+    if (!userData.country || userData.country.trim() === '') {
+        alert('Please select a country.');
+        return false;
+    }
+    
     return true;
 }
 
@@ -1097,8 +1178,9 @@ function populateAdditionalFields(userData) {
     const allergies = parseArrayFromString(userData.allergies);
     const sportiveDescriptions = parseArrayFromString(userData.sportive_description);
     const medicalConditions = parseArrayFromString(userData.medical_conditions);
+    const foodPreferences = parseArrayFromString(userData.food_preferences);
     
-    console.log('Parsed data:', { allergies, sportiveDescriptions, medicalConditions });
+    console.log('Parsed data:', { allergies, sportiveDescriptions, medicalConditions, foodPreferences });
     
     // Clear existing fields first
     clearExistingAdditionalFields();
@@ -1111,6 +1193,9 @@ function populateAdditionalFields(userData) {
     
     // Create and populate medical condition fields
     createAndPopulateFields('medical_conditions[]', medicalConditions, addMedicalField);
+    
+    // Create and populate food preference fields
+    createAndPopulateFields('food_preferences[]', foodPreferences, addFoodPreferenceField);
 }
 
 // Helper function to create and populate fields
@@ -1170,6 +1255,15 @@ function clearExistingAdditionalFields() {
         }
     }
 
+    // Clear food preferences (keep first one if exists)
+    const foodPreferenceFieldElements = document.querySelectorAll('input[name="food_preferences[]"]');
+    for (let i = 1; i < foodPreferenceFieldElements.length; i++) {
+        const fieldContainer = foodPreferenceFieldElements[i].closest('.dynamic-field');
+        if (fieldContainer) {
+            fieldContainer.remove();
+        }
+    }
+
     // Ensure at least one field exists for each category
     if (document.querySelectorAll('input[name="allergies[]"]').length === 0) {
         addAllergyField();
@@ -1180,11 +1274,15 @@ function clearExistingAdditionalFields() {
     if (document.querySelectorAll('input[name="medical_conditions[]"]').length === 0) {
         addMedicalField();
     }
+    if (document.querySelectorAll('input[name="food_preferences[]"]').length === 0) {
+        addFoodPreferenceField();
+    }
 
     // Reset tracking arrays
     allergyFields.length = 0;
     sportiveFields.length = 0;
     medicalFields.length = 0;
+    foodPreferenceFields.length = 0;
 
     // Re-add the first fields to tracking arrays
     const firstAllergyField = document.querySelector('input[name="allergies[]"]');
@@ -1200,6 +1298,11 @@ function clearExistingAdditionalFields() {
     const firstMedicalField = document.querySelector('input[name="medical_conditions[]"]');
     if (firstMedicalField) {
         medicalFields.push(firstMedicalField.id);
+    }
+
+    const firstFoodPreferenceField = document.querySelector('input[name="food_preferences[]"]');
+    if (firstFoodPreferenceField) {
+        foodPreferenceFields.push(firstFoodPreferenceField.id);
     }
 }
 
@@ -1224,13 +1327,15 @@ function checkForExistingInputsAndShowReportButton() {
         const allergies = parseArrayData(userData.allergies);
         const sportiveDescriptions = parseArrayData(userData.sportive_description);
         const medicalConditions = parseArrayData(userData.medical_conditions);
+        const foodPreferences = parseArrayData(userData.food_preferences);
         
         // If we have any validated data, show the report button
-        if (allergies.length > 0 || sportiveDescriptions.length > 0 || medicalConditions.length > 0) {
+        if (allergies.length > 0 || sportiveDescriptions.length > 0 || medicalConditions.length > 0 || foodPreferences.length > 0) {
             const mockValidatedData = {
                 allergies: allergies.map(item => ({ original_version: item })),
                 sportive_description: sportiveDescriptions.map(item => ({ original_version: item })),
-                medical_conditions: medicalConditions.map(item => ({ original_version: item }))
+                medical_conditions: medicalConditions.map(item => ({ original_version: item })),
+                food_preferences: foodPreferences.map(item => ({ original_version: item }))
             };
             showGetReportButton(mockValidatedData);
             disableAISuggestionButton();
@@ -1242,6 +1347,7 @@ function checkForExistingInputsAndShowReportButton() {
 window.addAllergyField = addAllergyField;
 window.addSportiveField = addSportiveField;
 window.addMedicalField = addMedicalField;
+window.addFoodPreferenceField = addFoodPreferenceField;
 window.removeField = removeField;
 window.goToHomepage = goToHomepage;
 

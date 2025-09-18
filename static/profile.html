@@ -47,10 +47,28 @@
                     <div class="form-group">
                         <div class="input-wrapper">
                             <i class="fas fa-venus-mars"></i>
-                            <select id="sex" name="sex" required>
+                            <select id="sex" name="sex" class="custom-select" required>
+                                <button>
+                                    <div>
+                                        <selectedcontent></selectedcontent>
+                                        <svg width="24" height="24" viewBox="0 0 24 24">
+                                            <path fill="currentColor" d="m7 10l5 5l5-5z"/>
+                                        </svg>
+                                    </div>
+                                </button>
+                                <div>
                                 <option value="">Select Sex</option>
-                                <option value="Male">Male</option>
-                                <option value="Female">Female</option>
+                                    <option value="Male">
+                                        <div class="custom-option">
+                                            <span class="option-text">Male</span>
+                                        </div>
+                                    </option>
+                                    <option value="Female">
+                                        <div class="custom-option">
+                                            <span class="option-text">Female</span>
+                                        </div>
+                                    </option>
+                                </div>
                             </select>
                         </div>
                     </div>
@@ -72,16 +90,220 @@
                             <input type="number" id="height" name="height" placeholder="Height (cm)" step="0.1" min="50" required>
                         </div>
                     </div>
-                    <div class="form-group full-width">
+                    <div class="form-group">
+                        <div class="input-wrapper">
+                            <i class="fas fa-globe"></i>
+                            <select id="country" name="country" class="custom-select" required>
+                                <button>
+                                    <div>
+                                        <selectedcontent></selectedcontent>
+                                        <svg width="24" height="24" viewBox="0 0 24 24">
+                                            <path fill="currentColor" d="m7 10l5 5l5-5z"/>
+                                        </svg>
+                                    </div>
+                                </button>
+                                <div>
+                                <option value="">Select Country</option>
+                                    <option value="United States">
+                                        <div class="custom-option">
+                                            <span class="flag"><img src="https://flagsapi.com/US/flat/16.png"></span>
+                                            <span class="option-text">United States</span>
+                                        </div>
+                                    </option>
+                                    <option value="Canada">
+                                        <div class="custom-option">
+                                            <span class="flag"><img src="https://flagsapi.com/CA/flat/16.png"></span>
+                                            <span class="option-text">Canada</span>
+                                        </div>
+                                    </option>
+                                    <option value="Mexico">
+                                        <div class="custom-option">
+                                            <span class="flag"><img src="https://flagsapi.com/MX/flat/16.png"></span>
+                                            <span class="option-text">Mexico</span>
+                                        </div>
+                                    </option>
+                                    <option value="Brazil">
+                                        <div class="custom-option">
+                                            <span class="flag"><img src="https://flagsapi.com/BR/flat/16.png"></span>
+                                            <span class="option-text">Brazil</span>
+                                        </div>
+                                    </option>
+                                    <option value="Argentina">
+                                        <div class="custom-option">
+                                            <span class="flag"><img src="https://flagsapi.com/AR/flat/16.png"></span>
+                                            <span class="option-text">Argentina</span>
+                                        </div>
+                                    </option>
+                                    <option value="Chile">
+                                        <div class="custom-option">
+                                            <span class="flag"><img src="https://flagsapi.com/CL/flat/16.png"></span>
+                                            <span class="option-text">Chile</span>
+                                        </div>
+                                    </option>
+                                    <option value="Colombia">
+                                        <div class="custom-option">
+                                            <span class="flag"><img src="https://flagsapi.com/CO/flat/16.png"></span>
+                                            <span class="option-text">Colombia</span>
+                                        </div>
+                                    </option>
+                                    <option value="Peru">
+                                        <div class="custom-option">
+                                            <span class="flag"><img src="https://flagsapi.com/PE/flat/16.png"></span>
+                                            <span class="option-text">Peru</span>
+                                        </div>
+                                    </option>
+                                    <option value="Venezuela">
+                                        <div class="custom-option">
+                                            <span class="flag"><img src="https://flagsapi.com/VE/flat/16.png"></span>
+                                            <span class="option-text">Venezuela</span>
+                                        </div>
+                                    </option>
+                                    <option value="Ecuador">
+                                        <div class="custom-option">
+                                            <span class="flag"><img src="https://flagsapi.com/EC/flat/16.png"></span>
+                                            <span class="option-text">Ecuador</span>
+                                        </div>
+                                    </option>
+                                    <option value="Bolivia">
+                                        <div class="custom-option">
+                                            <span class="flag"><img src="https://flagsapi.com/BO/flat/16.png"></span>
+                                            <span class="option-text">Bolivia</span>
+                                        </div>
+                                    </option>
+                                    <option value="Paraguay">
+                                        <div class="custom-option">
+                                            <span class="flag"><img src="https://flagsapi.com/PY/flat/16.png"></span>
+                                            <span class="option-text">Paraguay</span>
+                                        </div>
+                                    </option>
+                                    <option value="Uruguay">
+                                        <div class="custom-option">
+                                            <span class="flag"><img src="https://flagsapi.com/UY/flat/16.png"></span>
+                                            <span class="option-text">Uruguay</span>
+                                        </div>
+                                    </option>
+                                    <option value="Spain">
+                                        <div class="custom-option">
+                                            <span class="flag"><img src="https://flagsapi.com/ES/flat/16.png"></span>
+                                            <span class="option-text">Spain</span>
+                                        </div>
+                                    </option>
+                                    <option value="France">
+                                        <div class="custom-option">
+                                            <span class="flag"><img src="https://flagsapi.com/FR/flat/16.png"></span>
+                                            <span class="option-text">France</span>
+                                        </div>
+                                    </option>
+                                    <option value="Italy">
+                                        <div class="custom-option">
+                                            <span class="flag"><img src="https://flagsapi.com/IT/flat/16.png"></span>
+                                            <span class="option-text">Italy</span>
+                                        </div>
+                                    </option>
+                                    <option value="Germany">
+                                        <div class="custom-option">
+                                            <span class="flag"><img src="https://flagsapi.com/DE/flat/16.png"></span>
+                                            <span class="option-text">Germany</span>
+                                        </div>
+                                    </option>
+                                    <option value="Netherlands">
+                                        <div class="custom-option">
+                                            <span class="flag"><img src="https://flagsapi.com/NL/flat/16.png"></span>
+                                            <span class="option-text">Netherlands</span>
+                                        </div>
+                                    </option>
+                                    <option value="Belgium">
+                                        <div class="custom-option">
+                                            <span class="flag"><img src="https://flagsapi.com/BE/flat/16.png"></span>
+                                            <span class="option-text">Belgium</span>
+                                        </div>
+                                    </option>
+                                    <option value="Switzerland">
+                                        <div class="custom-option">
+                                            <span class="flag"><img src="https://flagsapi.com/CH/flat/16.png"></span>
+                                            <span class="option-text">Switzerland</span>
+                                        </div>
+                                    </option>
+                                    <option value="Austria">
+                                        <div class="custom-option">
+                                            <span class="flag"><img src="https://flagsapi.com/AT/flat/16.png"></span>
+                                            <span class="option-text">Austria</span>
+                                        </div>
+                                    </option>
+                                    <option value="Sweden">
+                                        <div class="custom-option">
+                                            <span class="flag"><img src="https://flagsapi.com/SE/flat/16.png"></span>
+                                            <span class="option-text">Sweden</span>
+                                        </div>
+                                    </option>
+                                    <option value="Norway">
+                                        <div class="custom-option">
+                                            <span class="flag"><img src="https://flagsapi.com/NO/flat/16.png"></span>
+                                            <span class="option-text">Norway</span>
+                                        </div>
+                                    </option>
+                                    <option value="Denmark">
+                                        <div class="custom-option">
+                                            <span class="flag"><img src="https://flagsapi.com/DK/flat/16.png"></span>
+                                            <span class="option-text">Denmark</span>
+                                        </div>
+                                    </option>
+                                    <option value="Finland">
+                                        <div class="custom-option">
+                                            <span class="flag"><img src="https://flagsapi.com/FI/flat/16.png"></span>
+                                            <span class="option-text">Finland</span>
+                                        </div>
+                                    </option>
+                                    <option value="Ireland">
+                                        <div class="custom-option">
+                                            <span class="flag"><img src="https://flagsapi.com/IE/flat/16.png"></span>
+                                            <span class="option-text">Ireland</span>
+                                        </div>
+                                    </option>
+                                </div>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">                        
                         <div class="input-wrapper">
                             <i class="fas fa-bullseye"></i>
-                            <select id="objective" name="objective" required>
+                            <select id="objective" name="objective" class="custom-select" required>
+                                <button>
+                                    <div>
+                                        <selectedcontent></selectedcontent>
+                                        <svg width="24" height="24" viewBox="0 0 24 24">
+                                            <path fill="currentColor" d="m7 10l5 5l5-5z"/>
+                                        </svg>
+                                    </div>
+                                </button>
+                                <div>
                                 <option value="">Select Objective</option>
-                                <option value="Weight Loss">Weight Loss</option>
-                                <option value="Muscle Gain">Muscle Gain</option>
-                                <option value="Maintenance">Maintenance</option>
-                                <option value="Fitness">Fitness</option>
-                                <option value="Health">Health</option>
+                                    <option value="Weight Loss">
+                                        <div class="custom-option">
+                                            <span class="option-text">Weight Loss</span>
+                                        </div>
+                                    </option>
+                                    <option value="Muscle Gain">
+                                        <div class="custom-option">
+                                            <span class="option-text">Muscle Gain</span>
+                                        </div>
+                                    </option>
+                                    <option value="Maintenance">
+                                        <div class="custom-option">
+                                            <span class="option-text">Maintenance</span>
+                                        </div>
+                                    </option>
+                                    <option value="Fitness">
+                                        <div class="custom-option">
+                                            <span class="option-text">Fitness</span>
+                                        </div>
+                                    </option>
+                                    <option value="Health">
+                                        <div class="custom-option">
+                                            <span class="option-text">Health</span>
+                                        </div>
+                                    </option>
+                                </div>
                             </select>
                         </div>
                     </div>
@@ -141,6 +363,19 @@
                     </div>
                     <div id="medicalContainer">
                         <!-- Medical condition fields will be added here dynamically -->
+                    </div>
+                </div>
+                
+                <!-- Food Preferences Section -->
+                <div class="form-group">
+                    <div class="section-header">
+                        <label><i class="fas fa-utensils"></i> Food Preferences and Dislikes</label>
+                        <button type="button" class="add-btn" onclick="addFoodPreferenceField()">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    <div id="foodPreferencesContainer">
+                        <!-- Food preference fields will be added here dynamically -->
                     </div>
                 </div>
 

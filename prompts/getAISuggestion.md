@@ -14,6 +14,7 @@ You will receive JSON data from a health and nutrition web application containin
 - Allergies
 - Exercise/sports activities 
 - Medical conditions
+- Food preferences
 
 ## Task
 **IMPORTANT: You must evaluate EVERY SINGLE entry in each array and include ALL of them in your response.**
@@ -26,26 +27,30 @@ Evaluate each entry for medical coherence and provide structured feedback with c
 "id": "user_identifier",
 "allergies": ["entry1", "entry2", ...],
 "sportive_description": ["entry1", "entry2", ...],
-"medical_conditions": ["entry1", "entry2", ...]
+"medical_conditions": ["entry1", "entry2", ...],
+"food_preferences": ["entry1","entry2",...]
 }
 ```
 
 ## Coherence Scoring System
 
 **Score 3 (Excellent):** Medically accurate, clear, and complete. Be permissive with natural language variations. Accept colloquial expressions, abbreviations, and informal medical terminology. Only correct if the meaning is genuinely unclear or medically inaccurate. Do not penalize for minor word order problems, stylistic issues or verb tenses.
-- Allergies: descriptions totally coherent, for example; "nuts", "shellfish", "pollen"
-- Sports:descriptions totally coherent, for example; "swimming 2 times per week", "running daily", "yoga 3x weekly"
-- Medical:descriptions totally coherent, for example; "asthma", "Type 2 diabetes", "hypertension"
+- Allergies: descriptions totally coherent, for example; "nuts", "shellfish", "pollen", etc
+- Sports:descriptions totally coherent, for example; "swimming 2 times per week", "running daily", "yoga 3x weekly", etc
+- Medical:descriptions totally coherent, for example; "asthma", "Type 2 diabetes", "hypertension", etc
+- Food preferences: descriptions totally coherent and understandable, related to food or diet: "I'm vegan", "I don't like X food", "I would prefer not to eat X so often", "vegetarian", "I enjoy eating hot dogs once in a while" etc. The fundamental thing is that it is clear whether the user likes or dislikes something and there are no spelling or grammatical error. If there are grammatical or spelling errors but it is clear if the user likes that or dislikes that it is a 2. Finally, if it is not clear if the user likes it or not, it is automatically a 1 (it doesn't matter if it is written in perfect english with no flaws)
 
 **Score 2 (Needs minor correction):** Understandable but has spelling errors, missing details, or unclear phrasing. 
 - Allergies: Description where something is missing, could be enhanced or corrected, for example things like; "nutz", "sea food" 
 - Sports: Description where something is missing, could be enhanced or corrected, for example things like; "I swim", "running sometimes", "weightlifting"
 - Medical: Description where something is missing, could be enhanced or corrected, for example things like; "I feel weird sometimes", "back problems", "stomach issues"
+- Food preferences: Description where something could be corrected, for example: "I don't like nutz", "I like potatou with butter every friday". The main idea to give it a 2 in coherence score for food preference is that the like/dislike is clear, however, there are some minor errors
 
 **Score 1 (Critical error):** Medically nonsensical, impossible, or completely irrelevant
 - Allergies: "allergy to darkness", "allergic to Mondays"
 - Sports: "I feel like superman", "flying every day"
 - Medical: "I like bananas", "happiness deficiency"
+- Food preferences: "Meat", "Milk", "bread", etc. These classify as coherence score of 1 because even though there are no grammatical errors, it is not clear if the user likes or not that specific food.
 
 ## Required Output Format
 ```json
@@ -72,6 +77,13 @@ Evaluate each entry for medical coherence and provide structured feedback with c
     "original_version": "exact_user_input_unchanged"
     }
 ],
+"food_preferences": [
+    {
+    "coherence_score": 1-3,
+    "suggested_version": "corrected_version_or_brief_explanation_why_incoherent_if_no_correction_put_the_original_text",
+    "original_version": "exact_user_input_unchanged"
+    }
+],
 "ready_to_go": 0 or 1
 }
 ```
@@ -85,6 +97,8 @@ Evaluate each entry for medical coherence and provide structured feedback with c
 2. Frequency information (times per week, daily, etc.)
 
 **Medical Conditions:** Must be legitimate medical conditions, symptoms, or health concerns
+
+**Food preferences:** Must be legitimate food preferences and be clear if the user likes it or not
 
 ## Output Guidelines
 - **Score 3:** Leave `suggested_version` as the original text
@@ -106,10 +120,11 @@ If input contains:
 {
 "allergies": ["nuts", "pollen", "lactose"],
 "sportive_description": ["swimming", "running daily"],
-"medical_conditions": ["asthma"]
+"medical_conditions": ["asthma"],
+"food_preferences": ["I follow a vegan diet", "I don't like bread"]
 }
 ```
 
-Your output MUST contain exactly 3 allergy objects, 2 sportive objects, and 1 medical condition object.
+Your output MUST contain exactly 3 allergy objects, 2 sportive objects, 1 medical condition object and 2 food preferences objects.
 
 Please respond with ONLY the transformed JSON, no additional text or explanations.

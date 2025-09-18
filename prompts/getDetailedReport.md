@@ -12,6 +12,7 @@ The patient weighs $userWeight kilograms and its height is $userHeight in centim
 $userAllergies .
 $userSportiveDescription .
 $userMedicalConditions .
+$foodPreferences . 
 
 ## Required output format
 The patient would like to have a report using the following JSON schema

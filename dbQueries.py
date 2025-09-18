@@ -98,6 +98,7 @@ def createUsersTable():
                 email VARCHAR(50),
                 password VARCHAR(60),
                 sex VARCHAR(10),
+                objective VARCHAR(20) DEFAULT NULL,
                 age INT,
 
                 weight FLOAT DEFAULT NULL,
@@ -105,7 +106,7 @@ def createUsersTable():
                 allergies TEXT DEFAULT NULL,
                 sportive_description TEXT DEFAULT NULL,
                 medical_conditions TEXT DEFAULT NULL,
-                objective VARCHAR(20) DEFAULT NULL,
+                food_preferences TEXT DEFAULT NULL,
 
                 recommended_daily_calories FLOAT DEFAULT NULL,
                 recommended_water_intake FLOAT DEFAULT NULL,
@@ -542,18 +543,20 @@ def updateAdditionalInformation(additionalInformationUser:AdditionalInformationU
             SET 
             allergies = %s,
             sportive_description = %s,
-            medical_conditions = %s
+            medical_conditions = %s,
+            food_preferences = %s
             WHERE id = %s   
             """
             # Convert arrays to JSON strings for database storage
             allergies_json = json.dumps(additionalInformationUser.allergies) if additionalInformationUser.allergies else None
             sportive_json = json.dumps(additionalInformationUser.sportive_description) if additionalInformationUser.sportive_description else None
             medical_json = json.dumps(additionalInformationUser.medical_conditions) if additionalInformationUser.medical_conditions else None
-            
+            food_preferences_json = json.dumps(additionalInformationUser.food_preferences) if additionalInformationUser.food_preferences else None
             cursor.execute(update_query, (
                 allergies_json,
                 sportive_json,
                 medical_json,
+                food_preferences_json,
                 additionalInformationUser.id
             ))
             mydb.commit()
@@ -585,6 +588,7 @@ def getDetailedReport(id:int):
     userWeight=userData["weight"]
     userHeight=userData["height"]
     userAllergies=userData["allergies"]
+    foodPreferences=userData["food_preferences"]
     userSportiveDescription=userData["sportive_description"]
     userMedicalConditions=userData["medical_conditions"]
 
@@ -600,7 +604,8 @@ def getDetailedReport(id:int):
         userHeight=userHeight,
         userAllergies=userAllergies if userAllergies else "The patient does not have any allergy",
         userSportiveDescription=userSportiveDescription if userSportiveDescription else "The patient does not have any sportive condition",
-        userMedicalConditions=userMedicalConditions if userMedicalConditions else "The patient does not have any dangerous medical condition such as Asthma, high blood pressure, and so on"
+        userMedicalConditions=userMedicalConditions if userMedicalConditions else "The patient does not have any dangerous medical condition such as Asthma, high blood pressure, and so on",
+        foodPreferences=foodPreferences if foodPreferences else "The patient does not have any food preference that must be considered"
         )
     
     print(prompt)
@@ -710,7 +715,8 @@ def getWeeklyMenus(id:int):
     recommendedFatsIntake=userData["recommended_fats_intake"]
     recommendedCarbohydratesIntake=userData["recommended_carbohydrates_intake"]
     nutritionalDeficiencyRisks=userData.get("nutritional_deficiency_risks", "")
-    
+    foodPreferences=userData.get("food_preferences", "")
+    country=userData["country"]
     #Trim unnecessary symbols
     allergies=allergies.translate(str.maketrans("", "", '[]"'))
     SportiveDescription=SportiveDescription.translate(str.maketrans("", "", '[]"'))
@@ -739,14 +745,14 @@ def getWeeklyMenus(id:int):
             userMedicalConditions= ("Medical conditions: " + userMedicalConditions) if userMedicalConditions else "The patient does not have any dangerous medical condition such as Asthma, high blood pressure, and so on",
             userSportiveDescription=("Sportive description: "+SportiveDescription)if SportiveDescription else "The patient does not have any sportive condition",
             userAllergies=("Allergies: " + allergies) if allergies else "The patient does not have any allergy",
+            foodPreferences=foodPreferences if foodPreferences else "The patient does not have any food preference that must be considered",
+            country=country if country else "United States"
             )
     print(prompt)
     try:
         # Make API call
         response = AIAgent.getLLMResponse(prompt)
-        #If the LLM request succeeds, save it to the DB'
-
-        #Save results as object. JSON format is useful to divide context by days
+        #If the LLM request succeeds, save it to the DB. Save results as object. JSON format is useful to divide context by days
         saveToDatabase=saveWeeklyMenus(response,id)
         print(saveToDatabase)
 
@@ -877,10 +883,12 @@ def getDailyModifiedMenu(id:int, day:int, userRequest:str):
     allergies=userData.get("allergies", "")
     SportiveDescription=userData.get("sportive_description", "")
     userMedicalConditions=userData.get("medical_conditions", "")
+    foodPreferences=userData.get("food_preferences", "")
     recommendedDailyCalories=userData["recommended_daily_calories"]
     recommendedProteinIntake=userData["recommended_protein_intake"]
     recommendedFatsIntake=userData["recommended_fats_intake"]
     recommendedCarbohydratesIntake=userData["recommended_carbohydrates_intake"]
+    country=userData["country"]
     
     #Now get the menu of the day from the DB
     menuOfTheDayQuery=f"""
@@ -919,10 +927,13 @@ def getDailyModifiedMenu(id:int, day:int, userRequest:str):
             userMedicalConditions= ("Medical conditions: " + userMedicalConditions) if userMedicalConditions else "The patient does not have any dangerous medical condition such as Asthma, high blood pressure, and so on",
             userSportiveDescription=("Sportive description: "+SportiveDescription)if SportiveDescription else "The patient does not have any sportive condition",
             userAllergies=("Allergies: " + allergies) if allergies else "The patient does not have any allergy",
-            menuOfTheDay=menuOfTheDay,
+            foodPreferences=("Food preferences: "+ foodPreferences) if foodPreferences else "The patient does not have any food preference that must be considered",
+            country=country if country else "United States",
+            menuOfTheDay=menuOfTheDay if menuOfTheDay else "No menu found for the day, hence, create a new one from scratch",
             userRequest=userRequest,
             chatHistory=chatHistory if chatHistory else "No previous chat history found, hence, no additional context needed to understand the request",
-            userName=userName
+            userName=userName,
+            daySelected= f"day{day}"
     )
     print(prompt)
     #Make API call
@@ -984,3 +995,4 @@ To-do
 3. Add a small re-try icon that allows to generate the whole weekly menu based on a user prompt. It would be
 better to validate the reason with AI before accepting it
 """
+

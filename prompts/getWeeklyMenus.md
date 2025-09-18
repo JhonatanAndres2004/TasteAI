@@ -19,7 +19,7 @@ Each day's total nutrition must equal the daily targets within 5% accuracy:
 1. First, determine how to distribute daily calories across meals (e.g., breakfast 25%, lunch 35%, dinner 30%, snacks 10%). This is just an example, vary the distribution throughout the week.
 2. Calculate the nutritional content for each meal to reach the daily targets
 3. Verify that the sum of all meals per day meets the daily requirements within the 5% accuracy. Allow some natural variation, the amount of calories, protein, carbohydrates or fats can change from day to day but within the 5% accuracy. For example, if the target calories is 2000, for the day 1 the total calories can be 1950, but on day 2 it could be 2030, then on day 3 a different value and so on. Same rule applies for protein, carbohydrates, and fats. Some natural variation through the week is expected and maked the menu look more natural and trustworthy
-4. Ensure variety across the 7 days - avoid repeating the same meals and ingredients as much as possible
+4. Ensure variety across the 7 days - follow the variety requirements and core repetition limits
 
 ## VARIETY REQUIREMENT AND CORE REPETITION LIMITS
 Each day should have different meals that are varied and do not bore the user 
@@ -36,6 +36,24 @@ Furthermore, the user gave important additional data (allergies and sports/medic
 $userMedicalConditions .  
 $userSportiveDescription .
 $userAllergies .
+$foodPreferences .
+
+### CLARIFICATION ON FOOD PREFERENCES
+In the food preferences section the user states important facts about the own diet regime:
+1. Dislikes: If the user does not like a food, never include it in the plan.
+2. Likes: If the user likes a food, you may include it occasionally, but with moderation. Check if it is healthy. If the food is healthy you can include it often, a maximum of 3-4 times a week. However, if the food is not benefitial do not include it more than 1–2 times per week (e.g., hamburgers, hot dogs → max. 2 times per week). 
+3. Dietary restrictions and regimes: Always respect specific regimes or beliefs (e.g., vegan, vegetarian, halal, kosher, “I’m Muslim and don’t eat pork”). These rules must be applied consistently across the entire plan.
+
+## USER COUNTRY CONTEXT
+When creating the diet plan, you must consider that the user is from $country. Please follow these guidelines:
+
+1. Local focus with flexibility: The diet plan should be primarily based on foods and dishes typical of the user’s country. However, don’t be overly strict—today, most supermarkets also offer many international products.
+
+2. Cultural variety: Even though the user is from $country , include one day per week with a menu inspired by another cuisine (e.g., Mediterranean, Arab, Asian, etc.). For example, if the user is from Colombia, Friday’s menu could follow a Mediterranean style.
+
+3. Authentic naming: Use the country’s authentic names for dishes and ingredients. Do not translate them into English unnecessarily or inaccurately. For instance: in Spain use paella, in Colombia use arepas, in Peru use ceviche, in Brasil use açaí, and so on with traditional names for other dishes from other countries
+
+4. Language of presentation: Write all the ingredients and cooking instructions in the main language of the country. For example: Brazil → Portuguese, Colombia → Spanish, United States → English, France → French, etc
 
 ## Ingredients, instructions and basic information about the menu
 You must specify not only the ingredients but also the recipe (how to make the dish) and the nutritional relevant value of each dish (calories, protein, fat and carbohydrates). All information must be structured using the JSON schema provided

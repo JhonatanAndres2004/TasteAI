@@ -718,6 +718,232 @@ body {
 .report-list--tall {
     max-height: 240px;
 }
+/* Personalized Dropdown Styling */
+.input-wrapper .custom-select {
+  /* Enable customizable select - override input-wrapper styles */
+  appearance: base-select !important;
+  background: none !important;
+  padding: 0 !important;
+  font-size: 1rem;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+/* Fallback for browsers that don't support appearance: base-select */
+@supports not (appearance: base-select) {
+  .input-wrapper .custom-select {
+    /* Fallback to traditional custom select styling */
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    background: rgba(255,255,255,0.7) !important;
+    border: 1px solid rgba(0,0,0,0.08) !important;
+    border-radius: 12px !important;
+    padding: 15px 45px 15px 45px !important;
+    color: #222 !important;
+    font-size: 1rem !important;
+    transition: all 0.3s ease !important;
+    backdrop-filter: blur(5px) !important;
+    cursor: pointer !important;
+
+  }
+  
+  .input-wrapper .custom-select:focus {
+    outline: none !important;
+    border-color: #009FE2 !important;
+    box-shadow: 0 0 0 3px rgba(0, 159, 226, 0.08) !important;
+    background-color: rgba(255,255,255,0.9) !important;
+  }
+  
+  /* Hide the custom button and div for fallback */
+  .input-wrapper .custom-select > button,
+  .input-wrapper .custom-select > div {
+    display: none !important;
+  }
+  
+  /* Style the fallback options */
+  .input-wrapper .custom-select option {
+    background-color: #ebf5fd !important;
+    color: #222 !important;
+    padding: 8px 12px !important;
+  }
+}
+
+.input-wrapper .custom-select::picker(select) {
+  appearance: base-select;
+}
+
+/* Enable transitions in the dropdown */
+.input-wrapper .custom-select::picker(select) {
+  transition: 
+    opacity .2s ease,
+    transform .2s cubic-bezier(0.4, 0, 0.2, 1), 
+    display .2s allow-discrete, 
+    overlay .2s allow-discrete;
+}
+
+.input-wrapper .custom-select::picker-icon {
+  display: none;
+}
+
+/* Set the off stage styles */
+.input-wrapper .custom-select:not(:open)::picker(select) {
+  opacity: 0;
+  transform: scale(.95);
+}
+
+/* Set the on stage styles */
+.input-wrapper .custom-select:open::picker(select) {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Transition the selected option changing */
+.input-wrapper .custom-select selectedcontent > * {
+  transition: 
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    display 0.3s allow-discrete, 
+    opacity 0.3s;
+  opacity: 1;
+}
+
+@starting-style {
+  .input-wrapper .custom-select selectedcontent > * {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+/* Customize the invoking button */
+.input-wrapper .custom-select > button {
+  width: 100%;
+  padding: 15px 15px 15px 45px;
+  background: rgba(255,255,255,0.7);
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 12px;
+  color: #222;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(5px);
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-align: left;
+}
+
+.input-wrapper .custom-select > button:focus-visible {
+  outline: none;
+  border-color: #009FE2;
+  box-shadow: 0 0 0 3px rgba(0, 159, 226, 0.08);
+  background: rgba(255,255,255,0.9);
+}
+
+.input-wrapper .custom-select > button:has(selectedcontent) {
+  align-items: center;
+  min-inline-size: 20ch;
+  flex-direction: row;
+}
+
+.input-wrapper .custom-select > button > div {
+  inline-size: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.input-wrapper .custom-select > button svg {
+  inline-size: 20px;
+  transition: transform .3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: #009FE2;
+}
+
+.input-wrapper .custom-select:open > button svg {
+  transform: rotate(.5turn);
+}
+
+/* Reset some picker styles */
+.input-wrapper .custom-select::picker(select) {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  padding: 0;
+  margin-block: 5px;
+  box-shadow: 0 25px 45px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(8px);
+}
+
+/* Customize the picker contents */
+.input-wrapper .custom-select > div {
+  min-inline-size: calc(anchor-size(self-inline) + 20px);
+  scroll-behavior: smooth;
+  max-block-size: 20lh;
+  scrollbar-width: thin;
+}
+
+.input-wrapper .custom-select > div option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 15px;
+  font-size: 1rem;
+  cursor: pointer;
+  outline-offset: -1px;
+  transition: all 0.2s ease;
+}
+
+.input-wrapper .custom-select > div option::checkmark {
+  font-weight: 600;
+}
+
+.input-wrapper .custom-select > div option:focus-visible {
+  outline-offset: -1px;
+}
+
+.input-wrapper .custom-select > div option:is(:focus, :hover) {
+  background: rgba(0, 159, 226, 0.1);
+  color: inherit;
+}
+
+.input-wrapper .custom-select > div option:is(:checked) {
+  background: linear-gradient(135deg, #009FE2 0%, #86e3ce 100%);
+  color: white;
+  font-weight: 600;
+}
+
+/* Custom option styling */
+.custom-option {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+}
+
+.custom-option .flag,
+.custom-option .gender-icon,
+.custom-option .objective-icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.custom-option .flag img {
+  width: 16px;
+  height: 16px;
+  object-fit: cover;
+  border-radius: 2px;
+}
+
+.custom-option .option-text {
+  flex: 1;
+}
+
+
+select > option {
+    background-color: #ebf5fd;
+}
 
 /* Responsive Design */
 @media (max-width: 1100px) {
