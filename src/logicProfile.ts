@@ -1,22 +1,61 @@
 import { UserManager } from './authManager.js';
 
 // Global variables to track dynamic fields
-let allergyFields = [];
-let sportiveFields = [];
-let medicalFields = [];
-let foodPreferenceFields = [];
+let allergyFields: any[] = [];
+let sportiveFields: any[] = [];
+let medicalFields: any[] = [];
+let foodPreferenceFields: any[] = [];
 
 // Track form states to detect changes
-let basicFormInitialState = {};
-let additionalFormInitialState = {};
+let basicFormInitialState: any = {};
+let additionalFormInitialState: any = {};
 let basicFormSubmitted = false;
 let additionalFormSubmitted = false;
 
 // DOM elements
-const basicForm = document.getElementById('basicInformationForm');
-const additionalForm = document.getElementById('additionalInformationForm');
-const basicSubmitBtn = document.getElementById('basicSubmitBtn');
-const additionalSubmitBtn = document.getElementById('additionalSubmitBtn');
+const basicForm = document.getElementById('basicInformationForm') as HTMLFormElement;
+const additionalForm = document.getElementById('additionalInformationForm') as HTMLFormElement;
+const basicSubmitBtn = document.getElementById('basicSubmitBtn') as HTMLButtonElement;
+const additionalSubmitBtn = document.getElementById('additionalSubmitBtn') as HTMLButtonElement;
+declare const Swal: any;
+
+interface ValidationResponse {
+    allergies?: any[];
+    sportive_description?: any[];
+    medical_conditions?: any[];
+    food_preferences?: any[];
+    ready_to_go?: number;
+}
+
+interface UserData {
+    id?: any ;
+    name?: string;
+    password?: string;
+    age?: number;
+    sex?: string;
+    weight?: number;
+    height?: number;
+    country?: string;
+    objective?: string;
+    allergies?: string[] | string;
+    sportive_description?: string[] | string;
+    medical_conditions?: string[] | string;
+    food_preferences?: string[] | string;
+    recommended_daily_calories?: number;
+    detailed_report?: any;
+    general_recommendation?: string;
+    ready_to_go?: number;
+}
+interface DetailedReport {
+    recommended_daily_calories?: string;
+    recommended_water_intake?: string;
+    recommended_protein_intake?: string;
+    recommended_fats_intake?: string;
+    recommended_carbohydrates_intake?: string;
+    nutritional_deficiency_risks?: string[];
+    general_recommendation?: string[];
+}
+
 
 // Initialize the forms
 document.addEventListener('DOMContentLoaded', function() {
@@ -35,8 +74,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function initializeForms() {
     // Set up form submissions
-    basicForm.addEventListener('submit', handleBasicFormSubmission);
-    additionalForm.addEventListener('submit', handleAdditionalFormSubmission);
+    basicForm?.addEventListener('submit', handleBasicFormSubmission);
+    additionalForm?.addEventListener('submit', handleAdditionalFormSubmission);
     
     // Set up real-time validation
     setupRealTimeValidation();
@@ -44,18 +83,20 @@ function initializeForms() {
 
 function captureInitialStates() {
     // Capture initial state of basic form
-    const basicInputs = basicForm.querySelectorAll('input, select');
-    basicFormInitialState = {};
-    basicInputs.forEach(input => {
+    const basicInputs = basicForm?.querySelectorAll('input, select');
+    basicFormInitialState = {}; // Reset global variable
+    basicInputs?.forEach((input: any) => {
         basicFormInitialState[input.name] = input.value;
     });
+    
+    console.log('captureInitialStates - basicFormInitialState set to:', basicFormInitialState);
     
     // Capture initial state of additional form (will be updated when fields are added)
     updateAdditionalFormInitialState();
 }
 
 function updateAdditionalFormInitialState() {
-    additionalFormInitialState = {
+    const additionalFormInitialState: any = {
         allergies: [],
         sportive: [],
         medical: [],
@@ -63,36 +104,36 @@ function updateAdditionalFormInitialState() {
     };
     
     // Capture current dynamic fields
-    document.querySelectorAll('input[name="allergies[]"]').forEach(input => {
+    document.querySelectorAll('input[name="allergies[]"]').forEach((input: any) => {
         additionalFormInitialState.allergies.push(input.value);
     });
     
-    document.querySelectorAll('input[name="sportive_description[]"]').forEach(input => {
+    document.querySelectorAll('input[name="sportive_description[]"]').forEach((input: any) => {
         additionalFormInitialState.sportive.push(input.value);
     });
     
-    document.querySelectorAll('input[name="medical_conditions[]"]').forEach(input => {
+    document.querySelectorAll('input[name="medical_conditions[]"]').forEach((input: any) => {
         additionalFormInitialState.medical.push(input.value);
     });
     
-    document.querySelectorAll('input[name="food_preferences[]"]').forEach(input => {
+    document.querySelectorAll('input[name="food_preferences[]"]').forEach((input: any) => {
         additionalFormInitialState.foodPreferences.push(input.value);
     });
 }
 
-let userId = null;
+let userId: any = null;
 function obtainExistingData() {
     // Check if user data is available in localStorage
-    const userData = JSON.parse(localStorage.getItem('user_data'));
+    const userData = JSON.parse(localStorage.getItem('user_data') || '{}');
     if (userData) {
         // Populate Basic Info section, including weight, height, objective,    
-        document.getElementById('name').value = userData.name || '';
-        document.getElementById('age').value = userData.age || '';  
-        document.getElementById('weight').value = userData.weight || '';
-        document.getElementById('sex').value=userData.sex || '';
-        document.getElementById('height').value = userData.height || '';
-        document.getElementById('objective').value = userData.objective || '';
-        document.getElementById('country').value = userData.country || '';
+        (document.getElementById('name') as HTMLInputElement).value = userData.name || '';
+        (document.getElementById('age') as HTMLInputElement).value = userData.age || '';  
+        (document.getElementById('weight') as HTMLInputElement).value = userData.weight || '';
+        (document.getElementById('sex') as HTMLInputElement).value=userData.sex || '';
+        (document.getElementById('height') as HTMLInputElement).value = userData.height || '';
+        (document.getElementById('objective') as HTMLInputElement).value = userData.objective || '';
+        (document.getElementById('country') as HTMLInputElement).value = userData.country || '';
         userId = userData.id; // Store user ID if available
         
         // Populate additional information fields if they exist
@@ -103,8 +144,8 @@ function obtainExistingData() {
 
 function setupEventListeners() {
     // Add input event listeners for real-time validation
-    const basicInputs = basicForm.querySelectorAll('input, select');
-    basicInputs.forEach(input => {
+    const basicInputs = basicForm?.querySelectorAll('input, select');
+    basicInputs?.forEach((input: any) => {
         input.addEventListener('input', validateBasicField);
         input.addEventListener('blur', validateBasicField);
         input.addEventListener('input', checkBasicFormChanges);
@@ -132,14 +173,14 @@ function addAllergyField() {
         </button>
     `;
     
-    container.appendChild(fieldDiv);
+    container?.appendChild(fieldDiv);
     allergyFields.push(fieldId);
     
     // Add validation listener
-    const input = document.getElementById(fieldId);
-    input.addEventListener('input', validateAdditionalForm);
-    input.addEventListener('input', checkAdditionalFormChanges);
-    input.addEventListener('input', () => clearFeedbackOnInput(fieldId));
+    const input = document.getElementById(fieldId) as HTMLInputElement;
+    input?.addEventListener('input', validateAdditionalForm);
+    input?.addEventListener('input', checkAdditionalFormChanges);
+    input?.addEventListener('input', () => clearFeedbackOnInput(fieldId));
     
     // Mark that form has changed when new field is added
     additionalFormSubmitted = false;
@@ -161,15 +202,15 @@ function addSportiveField() {
         </button>
     `;
     
-    container.appendChild(fieldDiv);
+    container?.appendChild(fieldDiv);
     sportiveFields.push(fieldId);
     
     // Add validation listener
-    const input = document.getElementById(fieldId);
-    input.addEventListener('input', validateAdditionalForm);
-    input.addEventListener('blur', validateAdditionalForm);
-    input.addEventListener('input', checkAdditionalFormChanges);
-    input.addEventListener('input', () => clearFeedbackOnInput(fieldId));
+    const input = document.getElementById(fieldId) as HTMLInputElement;
+    input?.addEventListener('input', validateAdditionalForm);
+    input?.addEventListener('blur', validateAdditionalForm);
+    input?.addEventListener('input', checkAdditionalFormChanges);
+    input?.addEventListener('input', () => clearFeedbackOnInput(fieldId));
     
     // Mark that form has changed when new field is added
     additionalFormSubmitted = false;
@@ -191,14 +232,14 @@ function addMedicalField() {
         </button>
     `;
     
-    container.appendChild(fieldDiv);
+    container?.appendChild(fieldDiv);
     medicalFields.push(fieldId);
     
     // Add validation listener
-    const input = document.getElementById(fieldId);
-    input.addEventListener('input', validateAdditionalForm);
-    input.addEventListener('input', checkAdditionalFormChanges);
-    input.addEventListener('input', () => clearFeedbackOnInput(fieldId));
+    const input = document.getElementById(fieldId) as HTMLInputElement;
+    input?.addEventListener('input', validateAdditionalForm);
+    input?.addEventListener('input', checkAdditionalFormChanges);
+    input?.addEventListener('input', () => clearFeedbackOnInput(fieldId));
     
     // Mark that form has changed when new field is added
     additionalFormSubmitted = false;
@@ -220,26 +261,26 @@ function addFoodPreferenceField() {
         </button>
     `;
     
-    container.appendChild(fieldDiv);
+    container?.appendChild(fieldDiv);
     foodPreferenceFields.push(fieldId);
     
     // Add validation listener
-    const input = document.getElementById(fieldId);
-    input.addEventListener('input', validateAdditionalForm);
-    input.addEventListener('input', checkAdditionalFormChanges);
-    input.addEventListener('input', () => clearFeedbackOnInput(fieldId));
+    const input = document.getElementById(fieldId) as HTMLInputElement;
+    input?.addEventListener('input', validateAdditionalForm);
+    input?.addEventListener('input', checkAdditionalFormChanges);
+    input?.addEventListener('input', () => clearFeedbackOnInput(fieldId));
     
     // Mark that form has changed when new field is added
     additionalFormSubmitted = false;
 }
 
-function removeField(fieldId, type) {
+function removeField(fieldId: any, type: any) {
     const fieldElement = document.getElementById(fieldId);
     if (fieldElement) {
         // Clear feedback for this specific field before removing
         clearFieldFeedback(fieldId);
         
-        fieldElement.parentElement.parentElement.remove();
+        fieldElement.parentElement?.parentElement?.remove();
         
         // Remove from tracking arrays
         switch(type) {
@@ -280,7 +321,7 @@ function setupRealTimeValidation() {
     });
 }
 
-function validateBasicField(event) {
+function validateBasicField(event : any) {
     const field = event.target;
     const fieldName = field.name;
     const value = field.value.trim();
@@ -362,7 +403,7 @@ function validateBasicField(event) {
     return isValid;
 }
 
-function showFieldError(field, message) {
+function showFieldError(field: any, message: any) {
     // Remove existing error message
     hideFieldError(field);
     
@@ -375,7 +416,7 @@ function showFieldError(field, message) {
     field.parentElement.parentElement.appendChild(errorDiv);
 }
 
-function hideFieldError(field) {
+function hideFieldError(field: any) {
     const existingError = field.parentElement.parentElement.querySelector('.error-message');
     if (existingError) {
         existingError.remove();
@@ -388,13 +429,21 @@ function validateBasicForm() {
     // Check required fields
     const requiredFields = ['name', 'password', 'sex', 'age', 'weight', 'height', 'country', 'objective'];
     requiredFields.forEach(fieldName => {
-        const field = document.getElementById(fieldName);
+        const field = document.getElementById(fieldName) as HTMLInputElement;
         if (field && !field.value.trim()) {
             isValid = false;
-            field.parentElement.parentElement.classList.add('error');
+            field.parentElement?.parentElement?.classList.add('error');
         } else if (field && field.value.trim()) {
-            field.parentElement.parentElement.classList.remove('error');
+            field.parentElement?.parentElement?.classList.remove('error');
         }
+    });
+  
+    // Debug logging
+    console.log('validateBasicForm:', {
+        isValid,
+        basicFormSubmitted,
+        hasChanges: hasBasicFormChanges(),
+        shouldDisable: !isValid || (basicFormSubmitted && !hasBasicFormChanges())
     });
   
     // Update submit button state
@@ -409,7 +458,7 @@ function validateAdditionalForm() {
     // Check if at least one sportive description has content
     const sportiveInputs = document.querySelectorAll('input[name="sportive_description[]"]');
     let hasSportiveContent = false;
-    sportiveInputs.forEach(input => {
+    sportiveInputs.forEach((input: any) => {
         if (input.value.trim()) {
             hasSportiveContent = true;
         }
@@ -437,34 +486,42 @@ function validateAdditionalForm() {
 }
 
 function hasBasicFormChanges() {
-    const currentInputs = basicForm.querySelectorAll('input, select');
-    for (let input of currentInputs) {
-        if (basicFormInitialState[input.name] !== input.value) {
+    const currentInputs = basicForm?.querySelectorAll('input, select');
+    console.log('hasBasicFormChanges - initial state:', basicFormInitialState);
+    
+    for (let input of currentInputs as NodeListOf<HTMLInputElement>) {
+        const initialValue = basicFormInitialState[input.name as keyof typeof basicFormInitialState];
+        const currentValue = input.value;
+        console.log(`Field ${input.name}: initial="${initialValue}" current="${currentValue}" changed=${initialValue !== currentValue}`);
+        
+        if (initialValue !== currentValue) {
+            console.log('hasBasicFormChanges: true (found changes)');
             return true;
         }
     }
+    console.log('hasBasicFormChanges: false (no changes)');
     return false;
 }
 
 function hasAdditionalFormChanges() {
-    const currentAllergies = [];
-    const currentSportive = [];
-    const currentMedical = [];
-    const currentFoodPreferences = [];
+    const currentAllergies: any[] = [];
+    const currentSportive: any[] = [];
+    const currentMedical: any[] = [];
+    const currentFoodPreferences: any[] = [];
     
-    document.querySelectorAll('input[name="allergies[]"]').forEach(input => {
+    document.querySelectorAll('input[name="allergies[]"]').forEach((input: any) => {
         currentAllergies.push(input.value);
     });
     
-    document.querySelectorAll('input[name="sportive_description[]"]').forEach(input => {
+    document.querySelectorAll('input[name="sportive_description[]"]').forEach((input: any) => {
         currentSportive.push(input.value);
     });
     
-    document.querySelectorAll('input[name="medical_conditions[]"]').forEach(input => {
+    document.querySelectorAll('input[name="medical_conditions[]"]').forEach((input: any) => {
         currentMedical.push(input.value);
     });
     
-    document.querySelectorAll('input[name="food_preferences[]"]').forEach(input => {
+    document.querySelectorAll('input[name="food_preferences[]"]').forEach((input: any) => {
         currentFoodPreferences.push(input.value);
     });
     
@@ -479,7 +536,7 @@ function hasAdditionalFormChanges() {
     return false;
 }
 
-function showNotification(message, type) {
+function showNotification(message: string, type: 'success' | 'error'): void {
     // Remove existing notifications
     const existingNotification = document.querySelector('.notification');
     if (existingNotification) {
@@ -552,18 +609,18 @@ function checkAdditionalFormChanges() {
 }
 
 // Custom function for basic form submission
-async function handleBasicFormSubmission(event) {
+async function handleBasicFormSubmission(event: Event) {
     event.preventDefault();
-    const formData = new FormData(basicForm);
+    const formData = new FormData(basicForm as HTMLFormElement);
     
     // Create user object for basic information
     const basicUserData = {
         name: formData.get('name'),
         password: formData.get('password'),
-        age: parseInt(formData.get('age')),
+        age: parseInt(formData.get('age') as string),
         sex: formData.get('sex'),
-        weight: parseFloat(formData.get('weight')),
-        height: parseFloat(formData.get('height')),
+        weight: parseFloat(formData.get('weight') as string),
+        height: parseFloat(formData.get('height') as string),
         country: formData.get('country'),
         objective: formData.get('objective'),
         id: userId
@@ -571,9 +628,20 @@ async function handleBasicFormSubmission(event) {
     console.log("Basic user data to be saved:", basicUserData);
     
     // Validate user data
-    if (!validateBasicUserData(basicUserData)) {
+    if (!validateBasicUserData(basicUserData as UserData)) {
         return;
     }
+    
+    // Disable button and show loading state
+    const originalButtonContent = basicSubmitBtn.innerHTML;
+    basicSubmitBtn.disabled = true;
+    basicSubmitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+    
+    // Disable form inputs during loading
+    const formInputs = basicForm.querySelectorAll('input, select, button');
+    formInputs.forEach((input: any) => {
+        input.disabled = true;
+    });
     
     try {
         const response = await fetch('http://localhost:8000/updateBasicInformation', {
@@ -606,56 +674,62 @@ async function handleBasicFormSubmission(event) {
         
         console.log('Basic user data saved:', basicUserData);
         
-        // Disable button until new changes
-        validateBasicForm();
-        
     } catch (error) {
         console.error('Error updating basic information:', error);
         showNotification("Failed to save basic information", "error");
-        return;
+    } finally {
+        // Re-enable form inputs (exclude submit button - let validation handle it)
+        const formInputs = basicForm.querySelectorAll('input, select');
+        formInputs.forEach((input: any) => {
+            input.disabled = false;
+        });
+        
+        // Restore button content and re-evaluate its state
+        basicSubmitBtn.innerHTML = originalButtonContent;
+        validateBasicForm(); // This will set the correct disabled state
     }
 }
 
 // Custom function for additional form submission
-async function handleAdditionalFormSubmission(event) {
+async function handleAdditionalFormSubmission(event: Event) {
     event.preventDefault();
     
     // Collect dynamic fields data
-    const allergies = [];
-    const sportiveDescriptions = [];
-    const medicalConditions = [];
-    const foodPreferences = [];
+    const allergies: any[] = [];
+    const sportiveDescriptions: any[] = [];
+    const medicalConditions: any[] = [];
+    const foodPreferences: any[] = [];
     
     // Collect allergies
-    document.querySelectorAll('input[name="allergies[]"]').forEach(input => {
+    document.querySelectorAll<HTMLInputElement>('input[name="allergies[]"]').forEach(input => {
         if (input.value.trim()) {
             allergies.push(input.value.trim());
         }
     });
     
     // Collect sportive descriptions
-    document.querySelectorAll('input[name="sportive_description[]"]').forEach(input => {
+    document.querySelectorAll<HTMLInputElement>('input[name="sportive_description[]"]').forEach(input => {
         if (input.value.trim()) {
             sportiveDescriptions.push(input.value.trim());
         }
     });
     
     // Collect medical conditions
-    document.querySelectorAll('input[name="medical_conditions[]"]').forEach(input => {
+    document.querySelectorAll<HTMLInputElement>('input[name="medical_conditions[]"]').forEach(input => {
         if (input.value.trim()) {
             medicalConditions.push(input.value.trim());
         }
     });
     
     // Collect food preferences
-    document.querySelectorAll('input[name="food_preferences[]"]').forEach(input => {
+    document.querySelectorAll<HTMLInputElement>('input[name="food_preferences[]"]').forEach(input => {
         if (input.value.trim()) {
             foodPreferences.push(input.value.trim());
         }
     });
     
     // Create additional user data
-    const additionalUserData = {
+    const additionalUserData: any = {
         allergies: allergies.length > 0 ? allergies : null,
         sportive_description: sportiveDescriptions,
         medical_conditions: medicalConditions.length > 0 ? medicalConditions : null,
@@ -686,7 +760,7 @@ async function handleAdditionalFormSubmission(event) {
     
     // Disable form inputs during loading
     const formInputs = additionalForm.querySelectorAll('input, button');
-    formInputs.forEach(input => {
+    formInputs.forEach((input: any) => {
         input.disabled = true;
     });
     
@@ -715,9 +789,9 @@ async function handleAdditionalFormSubmission(event) {
             // Close loading animation
             Swal.close();
             
-            // Re-enable form inputs
-            const formInputs = additionalForm.querySelectorAll('input, button');
-            formInputs.forEach(input => {
+            // Re-enable form inputs (exclude submit button - let validation handle it)
+            const formInputs = additionalForm.querySelectorAll('input');
+            formInputs.forEach((input: any) => {
                 input.disabled = false;
             });
             
@@ -747,9 +821,9 @@ async function handleAdditionalFormSubmission(event) {
     } catch (error) {
         console.error("Something went wrong", error);
         
-        // Re-enable form inputs on error
-        const formInputs = additionalForm.querySelectorAll('input, button');
-        formInputs.forEach(input => {
+        // Re-enable form inputs on error (exclude submit button - let validation handle it)
+        const formInputs = additionalForm.querySelectorAll('input');
+        formInputs.forEach((input: any) => {
             input.disabled = false;
         });
         
@@ -774,7 +848,7 @@ async function handleAdditionalFormSubmission(event) {
 }
 
 // Function to display validation feedback for each field
-function displayValidationFeedback(response) {
+function displayValidationFeedback(response: ValidationResponse) {
     // Clear any existing feedback
     clearValidationFeedback();
     
@@ -820,7 +894,7 @@ function displayValidationFeedback(response) {
 }
 
 // Function to display feedback for a single field
-function displayFieldFeedback(input, feedback) {
+function displayFieldFeedback(input: any, feedback: any) {
     const fieldContainer = input.closest('.dynamic-field');
     if (!fieldContainer) return;
     
@@ -870,7 +944,7 @@ function clearValidationFeedback() {
 }
 
 // Function to clear validation feedback for a specific field
-function clearFieldFeedback(fieldId) {
+function clearFieldFeedback(fieldId: any) {
     const fieldElement = document.getElementById(fieldId);
     if (fieldElement) {
         const fieldContainer = fieldElement.closest('.dynamic-field');
@@ -884,7 +958,7 @@ function clearFieldFeedback(fieldId) {
 }
 
 // Function to clear feedback when user starts typing in a field
-function clearFeedbackOnInput(fieldId) {
+function clearFeedbackOnInput(fieldId: any) {
     // Do not remove per-field feedback while typing; keep suggestions paired and visible
     // Only handle button state here
     disableReportButton();
@@ -901,7 +975,7 @@ function disableReportButton() {
 
 // Function to enable the AI suggestion button
 function enableAISuggestionButton() {
-    const additionalSubmitBtn = document.getElementById('additionalSubmitBtn');
+    const additionalSubmitBtn = document.getElementById('additionalSubmitBtn') as HTMLButtonElement;
     if (additionalSubmitBtn) {
         additionalSubmitBtn.disabled = false;
     }
@@ -909,14 +983,14 @@ function enableAISuggestionButton() {
 
 // Function to disable the AI suggestion button
 function disableAISuggestionButton() {
-    const additionalSubmitBtn = document.getElementById('additionalSubmitBtn');
+    const additionalSubmitBtn = document.getElementById('additionalSubmitBtn') as HTMLButtonElement;
     if (additionalSubmitBtn) {
         additionalSubmitBtn.disabled = true;
     }
 }
 
 // Function to show "Get my report" button
-async function showGetReportButton(validatedData) {
+async function showGetReportButton(validatedData: ValidationResponse) {
     // Remove existing button if any
     const existingButton = document.getElementById('getReportBtn');
     if (existingButton) {
@@ -961,7 +1035,7 @@ async function showGetReportButton(validatedData) {
             let bufferedSaveToast = null; // { icon, title, text }
 
             // Helper to emit or buffer save toast safely
-            const emitOrBufferSaveToast = (toastConfig) => {
+            const emitOrBufferSaveToast = (toastConfig: any) => {
                 if (reportLoadingActive) {
                     bufferedSaveToast = toastConfig;
                 } else {
@@ -1056,7 +1130,7 @@ async function showGetReportButton(validatedData) {
                         position: 'top-end',
                         showConfirmButton: false,
                         timer: 1500,
-                        ...bufferedSaveToast
+                        ...bufferedSaveToast as any
                     });
                     bufferedSaveToast = null;
                 }
@@ -1071,7 +1145,7 @@ async function showGetReportButton(validatedData) {
                         position: 'top-end',
                         showConfirmButton: false,
                         timer: 1500,
-                        ...bufferedSaveToast
+                        ...bufferedSaveToast as any
                     });
                     bufferedSaveToast = null;
                 }
@@ -1095,43 +1169,43 @@ async function showGetReportButton(validatedData) {
     });
     
     // Add button to the form
-    const additionalForm = document.getElementById('additionalInformationForm');
+    const additionalForm = document.getElementById('additionalInformationForm') as HTMLFormElement;
     additionalForm.appendChild(button);
 }
 
-function validateBasicUserData(userData) {
+function validateBasicUserData(userData: UserData) {
     // Validate name
-    if (userData.name.length < 6 || userData.name.length > 25) {
+    if (userData.name!.length < 6 || userData.name!.length > 25) {
         alert('Name must be between 6 and 25 characters.');
         return false;
     }
     
     // Validate password
-    if (userData.password.length < 8 || userData.password.length > 30) {
+    if (userData.password!.length < 8 || userData.password!.length > 30) {
         alert('Password must be between 8 and 30 characters.');
         return false;
     }
     
     // Validate age
-    if (userData.age < 18 || userData.age > 100) {
+    if (userData.age! < 18 || userData.age! > 100) {
         alert('Age must be between 18 and 100.');
         return false;
     }
     
     // Validate sex
-    if (!['Male', 'Female'].includes(userData.sex)) {
+    if (!['Male', 'Female'].includes(userData.sex!)) {
         alert('Please select a valid sex.');
         return false;
     }
     
     // Validate weight
-    if (userData.weight < 10) {
-        alert('Weight must be at least 10 kg.');
+    if (userData.weight! < 30) {
+        alert('Weight must be at least 30 kg.');
         return false;
     }
     
     // Validate height
-    if (userData.height < 50) {
+    if (userData.height! < 50) {
         alert('Height must be at least 50 cm.');
         return false;
     }
@@ -1145,7 +1219,7 @@ function validateBasicUserData(userData) {
     return true;
 }
 
-function validateAdditionalUserData(userData) {
+function validateAdditionalUserData(userData: UserData) {
     // Validate sportive description (must have at least one)
     if (!userData.sportive_description) {
         alert('At least one sportive description is required.');
@@ -1156,9 +1230,9 @@ function validateAdditionalUserData(userData) {
 }
 
 // Function to populate additional fields from localStorage data
-function populateAdditionalFields(userData) {
+function populateAdditionalFields(userData: UserData) {
     // Helper function to clean and parse JSON string
-    function parseArrayFromString(data) {
+    function parseArrayFromString(data: any) {
         if (!data) return [];
         if (Array.isArray(data)) return data;
         if (typeof data === 'string') {
@@ -1199,14 +1273,18 @@ function populateAdditionalFields(userData) {
 }
 
 // Helper function to create and populate fields
-function createAndPopulateFields(fieldName, items, addFieldFunction) {
+function createAndPopulateFields(
+    fieldName: string, 
+    items: string[], 
+    addFieldFunction: () => void
+): void {
     if (!items || items.length === 0) return;
 
     // Ensure at least one field exists for this group
-    let firstField = document.querySelector(`input[name="${fieldName}"]`);
+    let firstField = document.querySelector(`input[name="${fieldName}"]`) as HTMLInputElement | null;
     if (!firstField) {
         addFieldFunction();
-        const fieldsNow = document.querySelectorAll(`input[name="${fieldName}"]`);
+        const fieldsNow = document.querySelectorAll<HTMLInputElement>(`input[name="${fieldName}"]`);
         firstField = fieldsNow.length > 0 ? fieldsNow[0] : null;
     }
 
@@ -1218,7 +1296,7 @@ function createAndPopulateFields(fieldName, items, addFieldFunction) {
     // Create and populate remaining fields
     for (let i = 1; i < items.length; i++) {
         addFieldFunction();
-        const fields = document.querySelectorAll(`input[name="${fieldName}"]`);
+        const fields = document.querySelectorAll<HTMLInputElement>(`input[name="${fieldName}"]`);
         const newField = fields[fields.length - 1];
         if (newField) {
             newField.value = items[i] ?? '';
@@ -1311,7 +1389,7 @@ function checkForExistingInputsAndShowReportButton() {
     const userData = JSON.parse(localStorage.getItem('user_data') || '{}');
     if (userData) {
         // Helper function to parse JSON strings or return arrays
-        function parseArrayData(data) {
+        function parseArrayData(data: any) {
             if (!data) return [];
             if (Array.isArray(data)) return data;
             if (typeof data === 'string') {
@@ -1332,10 +1410,10 @@ function checkForExistingInputsAndShowReportButton() {
         // If we have any validated data, show the report button
         if (allergies.length > 0 || sportiveDescriptions.length > 0 || medicalConditions.length > 0 || foodPreferences.length > 0) {
             const mockValidatedData = {
-                allergies: allergies.map(item => ({ original_version: item })),
-                sportive_description: sportiveDescriptions.map(item => ({ original_version: item })),
-                medical_conditions: medicalConditions.map(item => ({ original_version: item })),
-                food_preferences: foodPreferences.map(item => ({ original_version: item }))
+                allergies: allergies.map((item: any) => ({ original_version: item })),
+                sportive_description: sportiveDescriptions.map((item: any) => ({ original_version: item })),
+                medical_conditions: medicalConditions.map((item: any) => ({ original_version: item })),
+                food_preferences: foodPreferences.map((item: any) => ({ original_version: item }))
             };
             showGetReportButton(mockValidatedData);
             disableAISuggestionButton();
@@ -1344,18 +1422,18 @@ function checkForExistingInputsAndShowReportButton() {
 }
 
 // Export functions for global access
-window.addAllergyField = addAllergyField;
-window.addSportiveField = addSportiveField;
-window.addMedicalField = addMedicalField;
-window.addFoodPreferenceField = addFoodPreferenceField;
-window.removeField = removeField;
-window.goToHomepage = goToHomepage;
+(window as any).addAllergyField = addAllergyField;
+(window as any).addSportiveField = addSportiveField;
+(window as any).addMedicalField = addMedicalField;
+(window as any).addFoodPreferenceField = addFoodPreferenceField;
+(window as any).removeField = removeField;
+(window as any).goToHomepage = goToHomepage;
 
 // Create a modern dashboard for the detailed report under the additional information form
-function renderDetailedReport(report) {
+function renderDetailedReport(report: DetailedReport) {
     try {
         // Normalize arrays that may arrive as JSON strings
-        const parseMaybeArray = (value) => {
+        const parseMaybeArray = (value: any) => {
             if (Array.isArray(value)) return value;
             if (typeof value === 'string') {
                 const t = value.trim();
@@ -1366,7 +1444,7 @@ function renderDetailedReport(report) {
             return value == null ? [] : [String(value)];
         };
 
-        const toNumber = (value) => {
+        const toNumber = (value: any) => {
             if (typeof value === 'number') return value;
             if (typeof value === 'string' && !Number.isNaN(Number(value))) return Number(value);
             return value;
@@ -1460,7 +1538,7 @@ function renderDetailedReport(report) {
                     <h3><i class="fas fa-utensils"></i> Nutritional Deficiency Risks </h3>
                 </div>
                 <div class="section-content">
-                    <ul class="report-list" style="text-align:left;color:#333">${nutritionalDeficiencyRisks.map(f => `<li>${f}</li>`).join('') || '<li>No items</li>'}</ul>
+                    <ul class="report-list" style="text-align:left;color:#333">${nutritionalDeficiencyRisks.map((f: any) => `<li>${f}</li>`).join('') || '<li>No items</li>'}</ul>
                 </div>
             </div>
         `;
@@ -1473,7 +1551,7 @@ function renderDetailedReport(report) {
                 <h3><i class="fas fa-notes-medical"></i> General Recommendations</h3>
             </div>
             <div class="section-content">
-                <ul class="report-list report-list--tall" style="text-align:left;color:#333">${general.map(g => `<li>${g}</li>`).join('') || '<li>No items</li>'}</ul>
+                <ul class="report-list report-list--tall" style="text-align:left;color:#333">${general.map((g: any) => `<li>${g}</li>`).join('') || '<li>No items</li>'}</ul>
             </div>
         `;
 
@@ -1524,7 +1602,7 @@ function checkForExistingReportData() {
 
         let report = null;
         if (hasTopLevel) {
-            report = keys.reduce((acc, k) => {
+            report = keys.reduce((acc: any, k: any) => {
                 if (userData[k] !== undefined) acc[k] = userData[k];
                 return acc;
             }, {});

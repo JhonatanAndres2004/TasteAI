@@ -1,5 +1,8 @@
 import {UserManager} from './authManager.js';
 
+// Declare SweetAlert2 global variable
+declare const Swal: any;
+
 const userManager = new UserManager();
 
 // Utility function to safely get menu data from localStorage
@@ -16,7 +19,7 @@ function getSafeMenuData() {
 }
 
 // Function to calculate daily nutrition totals
-function calculateDailyTotals(dayMeals) {
+function calculateDailyTotals(dayMeals: any) {
     const totals = {
         calories: 0,
         protein: 0,
@@ -24,7 +27,7 @@ function calculateDailyTotals(dayMeals) {
         carbohydrates: 0
     };
 
-    dayMeals.forEach(meal => {
+    dayMeals.forEach((meal: any) => {
         totals.calories += parseInt(meal.calories) || 0;
         totals.protein += parseInt(meal.protein) || 0;
         totals.fats += parseInt(meal.fats) || 0;
@@ -35,8 +38,8 @@ function calculateDailyTotals(dayMeals) {
 }
 
 // Function to create meal component
-function createMealComponent(meal) {
-    const mealTypeIcons = {
+function createMealComponent(meal: any) {
+    const mealTypeIcons: any = {
         breakfast: 'fas fa-sun',
         lunch: 'fas fa-cloud-sun',
         dinner: 'fas fa-moon',
@@ -47,7 +50,7 @@ function createMealComponent(meal) {
         <div class="meal-card ${meal.type}">
             <div class="meal-header">
                 <div class="meal-type">
-                    <i class="${mealTypeIcons[meal.type] || 'fas fa-utensils'}"></i>
+                    <i class="${mealTypeIcons[meal.type]  || 'fas fa-utensils'}"></i>
                     <h3>${meal.type.charAt(0).toUpperCase() + meal.type.slice(1)}</h3>
                 </div>
                 <div class="meal-time">
@@ -61,14 +64,14 @@ function createMealComponent(meal) {
                     <div class="meal-section">
                         <h4><i class="fas fa-shopping-basket"></i> Ingredients</h4>
                         <ul class="ingredients-list">
-                            ${meal.ingredients.map(ingredient => `<li>${ingredient}</li>`).join('')}
+                            ${meal.ingredients.map((ingredient: any) => `<li>${ingredient}</li>`).join('')}
                         </ul>
                     </div>
                     
                     <div class="meal-section">
                         <h4><i class="fas fa-list-ol"></i> Instructions</h4>
                         <ol class="instructions-list">
-                            ${meal.instructions.map(instruction => `<li>${instruction}</li>`).join('')}
+                            ${meal.instructions.map((instruction: any) => `<li>${instruction}</li>`).join('')}
                         </ol>
                     </div>
                 </div>
@@ -97,7 +100,7 @@ function createMealComponent(meal) {
 }
 
 // Function to create daily summary
-function createDailySummary(totals) {
+function createDailySummary(totals: any) {
     return `
         <div class="daily-summary">
             <h3><i class="fas fa-chart-pie"></i> Daily Nutrition Summary</h3>
@@ -144,7 +147,7 @@ function createDailySummary(totals) {
 }
 
 // Main function to create menu dashboard
-function createMenuDashboard(menuData) {
+function createMenuDashboard(menuData: any) {
     const days = ['day1', 'day2', 'day3', 'day4', 'day5', 'day6', 'day7'];
     const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
@@ -181,7 +184,7 @@ function createMenuDashboard(menuData) {
                                     </div>
                                     
                                     <div class="meals-container">
-                                        ${dayMeals.map(meal => createMealComponent(meal)).join('')}
+                                        ${dayMeals.map((meal: any) => createMealComponent(meal)).join('')}
                                     </div>
                                     
                                     ${createDailySummary(totals)}
@@ -195,7 +198,7 @@ function createMenuDashboard(menuData) {
     `;
 
     // Insert dashboard into container
-    document.getElementById('container').insertAdjacentHTML('beforeend', dashboardHTML);
+    document.getElementById('container')?.insertAdjacentHTML('beforeend', dashboardHTML);
 
     // Create and insert chat interface
     createChatInterface();
@@ -249,9 +252,9 @@ function createChatInterface() {
     wrapper.className = 'main-wrapper';
     
     // Wrap the existing container
-    const container = document.getElementById('container');
-    container.parentNode.insertBefore(wrapper, container);
-    wrapper.appendChild(container);
+    const container: HTMLElement | null = document.getElementById('container');
+    container?.parentNode?.insertBefore(wrapper, container);
+    wrapper.appendChild(container!);
     
     // Insert chat interface as a sibling to the container within wrapper
     wrapper.insertAdjacentHTML('beforeend', chatHTML);
@@ -263,7 +266,7 @@ function setupTabSwitching() {
     const tabPanels = document.querySelectorAll('.tab-panel');
     const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-    tabBtns.forEach((btn, index) => {
+    tabBtns.forEach((btn: any, index: number) => {
         btn.addEventListener('click', () => {
             const targetDay = btn.dataset.day;
 
@@ -273,7 +276,7 @@ function setupTabSwitching() {
 
             // Add active class to clicked tab and corresponding panel
             btn.classList.add('active');
-            document.querySelector(`.tab-panel[data-day="${targetDay}"]`).classList.add('active');
+            document.querySelector(`.tab-panel[data-day="${targetDay}"]`)?.classList.add('active');
             
             // Update current day indicator in chat
             const currentDayText = document.getElementById('currentDayText');
@@ -286,8 +289,8 @@ function setupTabSwitching() {
 
 // Function to setup chat functionality
 function setupChatFunctionality() {
-    const chatSendBtn = document.getElementById('chatSendBtn');
-    const chatInput = document.getElementById('chatInput');
+    const chatSendBtn = document.getElementById('chatSendBtn') as HTMLButtonElement;
+    const chatInput = document.getElementById('chatInput') as HTMLTextAreaElement;
 
     if (!chatSendBtn || !chatInput) return;
         
@@ -297,10 +300,10 @@ function setupChatFunctionality() {
         if (!message) return;
 
         // Get current active day
-        const activeTabPanel = document.querySelector('.tab-panel.active');
+        const activeTabPanel = document.querySelector('.tab-panel.active') as HTMLElement;
         if (!activeTabPanel) return;
         
-        const dayNumber = parseInt(activeTabPanel.dataset.dayNumber);
+        const dayNumber = parseInt(activeTabPanel.dataset.dayNumber as string);
         const userData = JSON.parse(localStorage.getItem('user_data') || '{}');
         const userId = userData.id;
 
@@ -383,7 +386,7 @@ function setupChatFunctionality() {
 }
 
 // Function to add message to chat
-function addMessageToChat(message, sender) {
+function addMessageToChat(message: string, sender: string) {
     const chatMessages = document.getElementById('chatMessages');
     if (!chatMessages) return;
     
@@ -413,20 +416,20 @@ document.addEventListener('DOMContentLoaded', function() {
     const userData=userManager.getCurrentUser();
 
     // Toggle dropdown menu when user icon is clicked
-    userIcon.addEventListener('click', function(e) {
+    userIcon?.addEventListener('click', function(e) {
         e.stopPropagation();
-        dropdownMenu.classList.toggle('show');
+        dropdownMenu?.classList.toggle('show');
     });
 
     // Close dropdown when clicking outside
     document.addEventListener('click', function(e) {
-        if (!userIcon.contains(e.target) && !dropdownMenu.contains(e.target)) {
-            dropdownMenu.classList.remove('show');
+        if (!userIcon?.contains(e.target as Node) && !dropdownMenu?.contains(e.target as Node)) {
+            dropdownMenu?.classList.remove('show');
         }
     });
 
     // Handle "Add Details" click
-    addDetailsBtn.addEventListener('click', function() {
+    addDetailsBtn?.addEventListener('click', function() {
         if(localStorage.getItem('user_data')){
         window.location.href = 'profile.html';
         }
@@ -440,7 +443,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Handle "Log Out" click with SweetAlert confirmation
-    logOutBtn.addEventListener('click', function() {
+    logOutBtn?.addEventListener('click', function() {
         Swal.fire({
             title: 'Logout Confirmation',
             text: 'Are you sure you want to log out?',
@@ -456,7 +459,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 confirmButton: 'swal-confirm-btn',
                 cancelButton: 'swal-cancel-btn'
             }
-        }).then((result) => {
+        }).then((result: any) => {
             if (result.isConfirmed) {
                userManager.logout();
                 Swal.fire({
@@ -473,11 +476,11 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Add hover effect for logout button (additional visual feedback)
-    logOutBtn.addEventListener('mouseenter', function() {
+    logOutBtn?.addEventListener('mouseenter', function() {
         this.style.transform = 'scale(1.02)';
     });
 
-    logOutBtn.addEventListener('mouseleave', function() {
+    logOutBtn?.addEventListener('mouseleave', function() {
         this.style.transform = 'scale(1)';
     });
 
@@ -485,7 +488,7 @@ document.addEventListener('DOMContentLoaded', function() {
     try {
         const userDataParsed = JSON.parse(localStorage.getItem('user_data') || 'null');
         const hasReport = Boolean(userDataParsed && userDataParsed['recommended_daily_calories']);
-        const landingEl = document.querySelector('.main-content.landing');
+        const landingEl = document.querySelector('.main-content.landing') as HTMLElement;
         const hasMenus = getSafeMenuData()
         const userId= userDataParsed.id
         if (hasReport && landingEl && !hasMenus) {
@@ -501,14 +504,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     <button id="getMenusButton" class="getMenusButton"> Get my weekly menus! </button>
                 </div>
             `;
-            document.getElementById('container').appendChild(placeholder);
-            const getMenusButton=document.getElementById('getMenusButton');
+            document.getElementById('container')?.appendChild(placeholder);
+            const getMenusButton=document.getElementById('getMenusButton') as HTMLButtonElement;
 
-            getMenusButton.addEventListener('click',async (event)=>{
+            getMenusButton?.addEventListener('click',async (event: any)=>{
                 event.preventDefault();
                 // Get loading and success elements
-                const loadingIndicator = document.getElementById('loadingIndicator');
-                const successMessage = document.getElementById('successMessage');
+                const loadingIndicator = document.getElementById('loadingIndicator') as HTMLElement;
+                const successMessage = document.getElementById('successMessage') as HTMLElement;
                 
                 // Disable button and show loading
                 getMenusButton.disabled = true;
