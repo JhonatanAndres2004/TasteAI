@@ -58,8 +58,8 @@ class MultiLLMService:
         """
         for provider in self.providers:
             try:
-                response = provider(prompt)
                 print(f"Using provider: {provider.__name__}")
+                response = provider(prompt)
                 print(f"Response: {response}")
 
                 formatted_response = self.ensureJSONFormat(response)

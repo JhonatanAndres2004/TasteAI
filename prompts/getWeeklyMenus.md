@@ -9,17 +9,30 @@ to accomplish the objective in calories, water, protein, fats and carbohydrates 
 the diet for the whole week (7 days, not more, nor less, do not add reference to the days of the week like monday, friday, etc.)
 
 ## Nutritional constraints and allowed ranged
-Each day's total nutrition must equal the daily targets within 5% accuracy:
+Each day's total nutrition must equal the daily targets within a certain tolerance interval:
 - Daily Calories Target: $recommendedDailyCalories calories (must be between $lowerRecommendedDailyCalories - $upperRecommendedDailyCalories )
-- Daily Protein Target: $recommendedProteinIntake g (must be between $lowerRecommendedProteinIntake - $upperRecommendedProteinIntake g)
-- Daily Fats Target: $recommendedFatsIntake g (must be between $lowerRecommendedFatsIntake - $upperRecommendedFatsIntake g)
-- Daily Carbohydrates Target: $recommendedCarbohydratesIntake g (must be between $lowerRecommendedCarbohydratesIntake - $upperRecommendedCarbohydratesIntake  g)
+- Daily Protein Target: $recommendedProteinIntake g (must be between $lowerRecommendedProteinIntake g - $upperRecommendedProteinIntake g)
+- Daily Fats Target: $recommendedFatsIntake g (must be between $lowerRecommendedFatsIntake g - $upperRecommendedFatsIntake g)
+- Daily Carbohydrates Target: $recommendedCarbohydratesIntake g (must be between $lowerRecommendedCarbohydratesIntake g - $upperRecommendedCarbohydratesIntake  g)
+
+Menu calculation involves multiple macronutrient constraints that must be balanced simultaneously. To handle this complexity, each macronutrient has defined tolerance intervals that allow for practical flexibility while maintaining nutritional integrity. Always aim to meet all four macronutrient targets (calories, protein, fats, and carbohydrates) within their respective tolerance ranges. When perfect compliance isn't possible, follow this priority order:
+
+1. Calories - Never exceed tolerance (non-negotiable)
+2. Protein - Never exceed tolerance (non-negotiable)
+3. Fats - Slight deviations may be acceptable in rare cases
+4. Carbohydrates - Most flexible if adjustments are needed
+
+
+Hence, violating calorie or protein tolerances is unacceptable under any circumstances, while Fat and carbohydrate targets should only be exceeded when absolutely necessary for menu feasibility (this case must be extremely unique and rare to see). Given the generous tolerance ranges provided, you are expected to consistently deliver menus that meet all four macronutrient requirements. In fact, tolerance intervals are designed to accommodate real-world food combinations and portion sizes
 
 ## IMPORTANT CALCULATION PROCESS
 1. First, determine how to distribute daily calories across meals (e.g., breakfast 25%, lunch 35%, dinner 30%, snacks 10%). This is just an example, vary the distribution throughout the week.
 2. Calculate the nutritional content for each meal to reach the daily targets
-3. Verify that the sum of all meals per day meets the daily requirements within the 5% accuracy. Allow some natural variation, the amount of calories, protein, carbohydrates or fats can change from day to day but within the 5% accuracy. For example, if the target calories is 2000, for the day 1 the total calories can be 1950, but on day 2 it could be 2030, then on day 3 a different value and so on. Same rule applies for protein, carbohydrates, and fats. Some natural variation through the week is expected and maked the menu look more natural and trustworthy
+3. Verify that the sum of all meals per day meets the daily requirements within the tolerance interval. Allow some natural variation, the amount of calories, protein, carbohydrates or fats can change from day to day but within the tolerance interval. For example, if the target calories is 2000, for the day 1 the total calories can be 1950, but on day 2 it could be 2030, then on day 3 a different value and so on. Same rule applies for protein, carbohydrates, and fats. Some natural variation through the week is expected and maked the menu look more natural and trustworthy
 4. Ensure variety across the 7 days - follow the variety requirements and core repetition limits
+
+## MACRONUTRIENT COMPENSATION ACROSS THE WEEK
+Try to compensate deficits and surplus or macronutrients across the week. E.g. if on day 1 the menu you proposed has a protein deficit, try to compensate it the next day using a protein surplus respecting always the tolerance range. The general rule is to balance across the week
 
 ## VARIETY REQUIREMENT AND CORE REPETITION LIMITS
 Each day should have different meals that are varied and do not bore the user 

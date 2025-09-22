@@ -7,8 +7,7 @@ enum Objectives {
     WeightLoss = "Weight Loss",
     MuscleGain = "Muscle Gain",
     Maintenance = "Maintenance",
-    Fitness = "Fitness",
-    Health = "Health"
+
 }
 
 interface UserData {

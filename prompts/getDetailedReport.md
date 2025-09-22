@@ -14,6 +14,29 @@ $userSportiveDescription .
 $userMedicalConditions .
 $foodPreferences . 
 
+## USER OBJECTIVE CLARIFICATION
+The user has chosen the objective from three options: muscle gain, weight loss and maintenance. The key guidelines that differentiate each objective are the following. Use one of the guideline groups depending on the user's needs. However, these are general ideas, modify/add/eliminate as required depending on the user's individual factors, the following guidelines are just general ideas, remember that as a professional in nutrition you have way more information than this: 
+
+### MUSCLE GAIN
+1. Create caloric surplus above maintenance needs
+2. Maintain high protein for muscle building
+3. Increase carbohydrates to fuel training and recovery
+4. Distribute protein throughout the day
+5. Include healthy fats for hormones and calories
+
+### WEIGHT LOSS
+1. Create caloric deficit below maintenance needs
+2. Prioritize high protein intake to preserve muscle
+3. Emphasize vegetables, fruits, and fiber-rich foods
+4. Minimize fats while meeting essential needs
+
+
+### MAINTENANCE
+1. Caloric deficit or surplus isn't required
+2. Moderate protein intake for general needs
+3. Emphasize overall health and energy
+
+
 ## Required output format
 The patient would like to have a report using the following JSON schema
 

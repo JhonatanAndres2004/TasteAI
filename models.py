@@ -8,8 +8,7 @@ class Objectives(str, Enum):
     weight_loss = "Weight Loss"
     muscle_gain = "Muscle Gain"
     maintenance = "Maintenance"
-    fitness = "Fitness"
-    health = "Health"
+
 
 class User(BaseModel):
     name: str =Field(default="User", min_length=6, max_length=35)

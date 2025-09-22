@@ -68,8 +68,8 @@ if mydb is None:
 #Now initialize the processing agent
 AIAgent = MultiLLMService([])
 AIAgent.providers = [
-    AIAgent.openai_provider,
     AIAgent.gemini_provider,
+    AIAgent.openai_provider,
     AIAgent.anthropic_provider
 ]
 
@@ -734,18 +734,18 @@ def getWeeklyMenus(id:int):
             lowerRecommendedDailyCalories=int(recommendedDailyCalories*0.95),
             upperRecommendedDailyCalories=int(recommendedDailyCalories*1.05),
             recommendedProteinIntake=recommendedProteinIntake,
-            lowerRecommendedProteinIntake=int(recommendedProteinIntake*0.95),
-            upperRecommendedProteinIntake=int(recommendedProteinIntake*1.05),
+            lowerRecommendedProteinIntake=int(recommendedProteinIntake*0.9),
+            upperRecommendedProteinIntake=int(recommendedProteinIntake*1.1),
             recommendedFatsIntake=recommendedFatsIntake,
-            lowerRecommendedFatsIntake=int(recommendedFatsIntake*0.95),
-            upperRecommendedFatsIntake=int(recommendedFatsIntake*1.05),
+            lowerRecommendedFatsIntake=int(recommendedFatsIntake*0.85),
+            upperRecommendedFatsIntake=int(recommendedFatsIntake*1.15),
             recommendedCarbohydratesIntake=recommendedCarbohydratesIntake,
-            lowerRecommendedCarbohydratesIntake=int(recommendedCarbohydratesIntake*0.95),
-            upperRecommendedCarbohydratesIntake=int(recommendedCarbohydratesIntake*1.05),
+            lowerRecommendedCarbohydratesIntake=int(recommendedCarbohydratesIntake*0.8),
+            upperRecommendedCarbohydratesIntake=int(recommendedCarbohydratesIntake*1.2),
             userMedicalConditions= ("Medical conditions: " + userMedicalConditions) if userMedicalConditions else "The patient does not have any dangerous medical condition such as Asthma, high blood pressure, and so on",
             userSportiveDescription=("Sportive description: "+SportiveDescription)if SportiveDescription else "The patient does not have any sportive condition",
             userAllergies=("Allergies: " + allergies) if allergies else "The patient does not have any allergy",
-            foodPreferences=foodPreferences if foodPreferences else "The patient does not have any food preference that must be considered",
+            foodPreferences=("Food preferences: " + foodPreferences) if foodPreferences else "The patient does not have any food preference that must be considered",
             country=country if country else "United States"
             )
     print(prompt)
