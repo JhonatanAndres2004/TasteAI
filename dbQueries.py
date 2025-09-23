@@ -198,16 +198,15 @@ def createChatHistoryTable():
 
     create_chat_history_table_query="""
     CREATE TABLE if NOT EXISTS chat_history (
-        user_id_history INT PRIMARY KEY,
-        day1    TEXT DEFAULT NULL,
-        day2   TEXT DEFAULT NULL,
-        day3 TEXT DEFAULT NULL,
-        day4  TEXT DEFAULT NULL,
-        day5    TEXT DEFAULT NULL,
-        day6  TEXT DEFAULT NULL,
-        day7    TEXT DEFAULT NULL,
-        FOREIGN KEY (user_id_history) REFERENCES users(id)
-            ON DELETE CASCADE
+        id INT PRIMARY KEY AUTO_INCREMENT,
+        user_id INT NOT NULL,
+        day INT NOT NULL,
+        request TEXT DEFAULT NULL,
+        response TEXT DEFAULT NULL,
+        creationDate DATETIME DEFAULT NULL,
+        FOREIGN KEY (user_id) REFERENCES users(id)
+            ON DELETE CASCADE,
+        INDEX idx_user_day (user_id, day)
     );
     """
     try:
@@ -717,13 +716,13 @@ def getWeeklyMenus(id:int):
     nutritionalDeficiencyRisks=userData.get("nutritional_deficiency_risks", "")
     foodPreferences=userData.get("food_preferences", "")
     country=userData["country"]
-    #Trim unnecessary symbols
-    allergies=allergies.translate(str.maketrans("", "", '[]"'))
-    SportiveDescription=SportiveDescription.translate(str.maketrans("", "", '[]"'))
-    userMedicalConditions=userMedicalConditions.translate(str.maketrans("", "", '[]"'))
+    #Trim unnecessary symbols (only if not None)
+    allergies = allergies.translate(str.maketrans("", "", '[]"')) if allergies else ""
+    SportiveDescription = SportiveDescription.translate(str.maketrans("", "", '[]"')) if SportiveDescription else ""
+    userMedicalConditions = userMedicalConditions.translate(str.maketrans("", "", '[]"')) if userMedicalConditions else ""
 
 
-    nutritionalDeficiencyRisks=nutritionalDeficiencyRisks.translate(str.maketrans("", "", '[]"'))
+    nutritionalDeficiencyRisks = nutritionalDeficiencyRisks.translate(str.maketrans("", "", '[]"')) if nutritionalDeficiencyRisks else ""
 
     #Read the prompt template from file
     with open("prompts/getWeeklyMenus.md", "r", encoding="utf-8") as f:
@@ -808,41 +807,6 @@ def saveWeeklyMenus(jsonPayload: object, id:int):
     finally:
         cursor.close()
 
-def gatherRelevantPastMessages(jsonPayload: object, id:int, day:int, userRequest:str):
-    """
-    Function to find relevant past messages to consider when altering the daily menu. It will use embeddings to find the most relevant messages.
-
-    Args:
-
-    jsonPayload: Menu for the day in JSON format
-    id: Unique identifier for each user
-    day: The day of the menu to alter
-
-    Returns:
-    Object with the new menu for the day
-    """
-    global mydb
-    cursor=mydb.cursor()
-
-    #First check if previous chat exist for the day and the user. This gives context to the AI.
-    previousChatQuery="""
-        SELECT * FROM chat_history WHERE user_id = %s AND day = %s
-    """
-    cursor.execute(previousChatQuery, (id, day))
-    previousChat=cursor.fetchone()
-
-    #Just call the function to get the daily modified menu. The additional logic is handled by that function
-    if previousChat:
-        previousChat=previousChat[0]
-        print(f"Previous chat found for user {id} and day {day}: {previousChat}")
-    else:
-        previousChat=None
-        print(f"No previous chat found for user {id} and day {day}")
-
-    result=getDailyModifiedMenu(id, day, jsonPayload, previousChat, userRequest)
-
-
-
 def getDailyModifiedMenu(id:int, day:int, userRequest:str):
     """
     Function to get the daily modified menu
@@ -904,10 +868,27 @@ def getDailyModifiedMenu(id:int, day:int, userRequest:str):
 
     #Get the user name to personalize a bit the prompt
     userName=userData["name"]
-
-    #To-Do get relevant past messages using embeddings, for now just empty---------------------------------------------------
     chatHistory=None
-
+    '''
+    #Get relevant past messages for this user and day
+    chatHistoryQuery="""
+        SELECT request, response, creationDate FROM chat_history 
+        WHERE user_id = %s AND day = %s 
+        ORDER BY creationDate ASC
+    """
+    cursor.execute(chatHistoryQuery, (id, day))
+    chatHistoryRecords=cursor.fetchall()
+    
+    if chatHistoryRecords:
+        # Format chat history for the AI prompt
+        chatHistory = "Previous conversation for this day:\n"
+        for record in chatHistoryRecords:
+            chatHistory += f"User: {record[0]}\nAssistant: {record[1]}\n---\n"
+        print(f"Found {len(chatHistoryRecords)} previous chat messages for user {id} and day {day}")
+    else:
+        chatHistory = None
+        print(f"No previous chat history found for user {id} and day {day}")
+    '''
     #Read the prompt template from file
     with open("prompts/modifyDailyMenu.md", "r", encoding="utf-8") as f:
         template = Template(f.read())
@@ -916,14 +897,14 @@ def getDailyModifiedMenu(id:int, day:int, userRequest:str):
             lowerRecommendedDailyCalories=int(recommendedDailyCalories*0.95),
             upperRecommendedDailyCalories=int(recommendedDailyCalories*1.05),
             recommendedProteinIntake=recommendedProteinIntake,
-            lowerRecommendedProteinIntake=int(recommendedProteinIntake*0.95),
-            upperRecommendedProteinIntake=int(recommendedProteinIntake*1.05),
+            lowerRecommendedProteinIntake=int(recommendedProteinIntake*0.9),
+            upperRecommendedProteinIntake=int(recommendedProteinIntake*1.1),
             recommendedFatsIntake=recommendedFatsIntake,
-            lowerRecommendedFatsIntake=int(recommendedFatsIntake*0.95),
-            upperRecommendedFatsIntake=int(recommendedFatsIntake*1.05),
+            lowerRecommendedFatsIntake=int(recommendedFatsIntake*0.85),
+            upperRecommendedFatsIntake=int(recommendedFatsIntake*1.15),
             recommendedCarbohydratesIntake=recommendedCarbohydratesIntake,
-            lowerRecommendedCarbohydratesIntake=int(recommendedCarbohydratesIntake*0.95),
-            upperRecommendedCarbohydratesIntake=int(recommendedCarbohydratesIntake*1.05),
+            lowerRecommendedCarbohydratesIntake=int(recommendedCarbohydratesIntake*0.8),
+            upperRecommendedCarbohydratesIntake=int(recommendedCarbohydratesIntake*1.2),
             userMedicalConditions= ("Medical conditions: " + userMedicalConditions) if userMedicalConditions else "The patient does not have any dangerous medical condition such as Asthma, high blood pressure, and so on",
             userSportiveDescription=("Sportive description: "+SportiveDescription)if SportiveDescription else "The patient does not have any sportive condition",
             userAllergies=("Allergies: " + allergies) if allergies else "The patient does not have any allergy",
@@ -933,7 +914,7 @@ def getDailyModifiedMenu(id:int, day:int, userRequest:str):
             userRequest=userRequest,
             chatHistory=chatHistory if chatHistory else "No previous chat history found, hence, no additional context needed to understand the request",
             userName=userName,
-            daySelected= f"day{day}"
+            dayKey= f"day{day}"
     )
     print(prompt)
     #Make API call
@@ -946,6 +927,8 @@ def getDailyModifiedMenu(id:int, day:int, userRequest:str):
             saveModifiedDailyMenu(id, day, response)
         else:
             print(f"No changes made to the menu for user {id} and day {day} due to vague user request")
+        #Save the chat history no matter if the menu is modified or not
+        saveChatHistory(id, day, userRequest, json.dumps(response, ensure_ascii=False, default=str))
         return response
     
     except Exception as e:
@@ -973,9 +956,12 @@ def saveModifiedDailyMenu(id:int, day:int, jsonPayload:object):
     save_modified_daily_menu_query=f"""
         UPDATE user_menus SET day{day} = %s WHERE user_id = %s
     """
-    try:
-        cursor.execute(save_modified_daily_menu_query, (json.dumps(jsonPayload[f"day{day}"]), id))
-        mydb.commit()
+    try:#Check the length to see if it is an empty array
+        if jsonPayload[f"day{day}"].length > 0:
+            cursor.execute(save_modified_daily_menu_query, (json.dumps(jsonPayload[f"day{day}"], ensure_ascii=False, default=str), id))
+            mydb.commit()
+        else:
+            print(f"No changes made to the menu for user {id} and day {day} due to vague user request")
         print(f"Modified daily menu for user {id} and day {day} saved successfully")
         return {"status": "success", "message": f"Modified daily menu for user {id} and day {day} saved successfully"}
     
@@ -986,13 +972,90 @@ def saveModifiedDailyMenu(id:int, day:int, jsonPayload:object):
     finally:
         cursor.close()
     
+def saveChatHistory(id:int, day:int, userRequest:str, response:str):
+    """
+    Function to save the chat history
+
+    Args: 
+    id: Unique identifier for each user
+    day: The day of the menu to save
+    userRequest: The user request
+    response: The response from the AI
+
+    Returns:
+    Success or failure message
+    """
+    global mydb
+    cursor=mydb.cursor()
     
-"""
-To-do
+    save_chat_history_query=f"""
+        INSERT INTO chat_history (user_id, day, request, response, creationDate) VALUES (%s, %s, %s, %s, %s)
+    """
+    try:
+        cursor.execute(save_chat_history_query, (id, day, userRequest, response, datetime.now()))
+        mydb.commit()
+        print(f"Chat history for user {id} and day {day} saved successfully")
+        return {"status": "success", "message": f"Chat history for user {id} and day {day} saved successfully"}
+    except Exception as e:
+        print(f"Error: {e}")
+        return {"status": "error", "message":e}
+    
+    finally:
+        cursor.close()
 
-1. Create a function to call a general LLM in case it is necessary to switch engine or even add multi-provider support or fallbacks
-2. Create a function to store chat history for each day
-3. Add a small re-try icon that allows to generate the whole weekly menu based on a user prompt. It would be
-better to validate the reason with AI before accepting it
-"""
+def loadUserMenu(id:int):
+    """
+    Function to load the user menu from the database
+    """
+    global mydb
+    cursor=mydb.cursor(dictionary=True)
+    load_user_menu_query=f"""
+        SELECT * FROM user_menus WHERE user_id = %s
+    """
+    try:
+        cursor.execute(load_user_menu_query, (id,))
+        user_menu=cursor.fetchone()
+        if user_menu:
+            user_menu_object={}
+            for day in range(1, 8):
+                day_data = user_menu[f"day{day}"]
+                if day_data:
+                    # Parse JSON string back to object/array
+                    user_menu_object[f"day{day}"] = json.loads(day_data)
+                else:
+                    user_menu_object[f"day{day}"] = None
+            return user_menu_object
+        else:
+            return None
+    except Exception as e:
+        print(f"Error: {e}")
+        return None
+    finally:
+        cursor.close()
 
+def loadUserChatHistory(id:int):
+    """
+    Function to load the user chat history from the database
+    """
+    global mydb
+    cursor=mydb.cursor(dictionary=True)
+    try: 
+        load_user_chat_history_query=f"""
+            SELECT * FROM chat_history WHERE user_id = %s ORDER BY creationDate ASC
+        """
+        cursor.execute(load_user_chat_history_query, (id,))
+        user_chat_history=cursor.fetchall()
+        user_chat_history_object={}
+
+        for record in user_chat_history:
+            day=record["day"]
+            day_key = f"day{day}"
+            if day_key not in user_chat_history_object:
+                user_chat_history_object[day_key]=[]
+            user_chat_history_object[day_key].append({"userRequest": record["request"], "response": json.loads(record["response"]).get("notes", "")})
+        return user_chat_history_object
+    except Exception as e:
+        print(f"Error: {e}")
+        return None
+    finally:
+        cursor.close()

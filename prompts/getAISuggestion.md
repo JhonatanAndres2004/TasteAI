@@ -1,9 +1,7 @@
 Please verify and transform the following JSON data according to the instructions below.
 
-INPUT JSON:
-$additionalInformationUser_str
-
-TRANSFORMATION INSTRUCTIONS:
+# INPUT JSON
+The input JSON is: $additionalInformationUser_str
 
 # Medical Information Validation Prompt
 

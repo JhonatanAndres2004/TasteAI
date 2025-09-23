@@ -89,14 +89,14 @@ You must specify not only the ingredients but also the recipe (how to make the d
         },
         {
         "next meal of the day with same structure"
-        }, ... the rest of the meals for the day
+        }, //... the rest of the meals for the day
     ],
-    "day2": [...],
-    "day3": [...],
-    "day4": [...],
-    "day5": [...],
-    "day6": [...],
-    "day7": [...]
+    "day2": ["..."],
+    "day3": ["..."],
+    "day4": ["..."],
+    "day5": ["..."],
+    "day6": ["..."],
+    "day7": ["..."]
 }
 ```
 

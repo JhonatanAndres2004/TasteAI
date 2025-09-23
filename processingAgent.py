@@ -46,7 +46,7 @@ class MultiLLMService:
             print("Response is not valid JSON.")
             return None
 
-    def getLLMResponse(self, prompt: str) -> str:
+    def getLLMResponse(self, prompt: str) -> object:
         """
         Try each provider in order until one succeeds.
 
@@ -54,7 +54,7 @@ class MultiLLMService:
         prompt: The input prompt to send to the LLM.
 
         Returns:
-        The response from the first successful provider.
+        The parsed JSON object from the first successful provider, or None if all fail.
         """
         for provider in self.providers:
             try:

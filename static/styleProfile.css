@@ -135,7 +135,9 @@ body {
     border-radius: 20px;
     z-index: -1;
 }
-
+body::-webkit-scrollbar-button {
+  display: none !important; /* Hides arrows */
+}
 /* Form Header */
 .form-header {
     text-align: center;
@@ -357,7 +359,7 @@ body {
 .section-content {
     padding: 25px;
     transition: all 0.3s ease;
-    max-height: 1000px;
+    max-height: 2000px;
     opacity: 1;
     overflow: hidden;
 }
@@ -658,7 +660,7 @@ body {
 
 /* Scrollable list for report sections */
 .report-list {
-    max-height: 180px;
+    max-height: 300px;
     overflow: auto;
     padding-left: 18px;
     list-style: disc;
@@ -676,6 +678,16 @@ body {
 /* Separate card styling for report */
 .report-card {
     margin-top: 25px;
+    min-height: auto;
+}
+
+/* Ensure report sections have adequate spacing */
+.report-card .section-container {
+    margin-bottom: 20px;
+}
+
+.report-card .section-container:last-child {
+    margin-bottom: 0;
 }
 
 /* Color variants */
@@ -716,7 +728,7 @@ body {
 
 /* Taller list for general recommendations */
 .report-list--tall {
-    max-height: 240px;
+    max-height: 400px;
 }
 /* Personalized Dropdown Styling */
 .input-wrapper .custom-select {
@@ -1071,6 +1083,40 @@ select > option {
         align-self: flex-end;
         margin-top: -40px;
         margin-right: 10px;
+    }
+    
+    /* Enhanced report list heights for mobile */
+    .report-list {
+        max-height: 350px;
+    }
+    
+    .report-list--tall {
+        max-height: 450px;
+    }
+}
+
+/* Specific fixes for screens under 770px */
+@media (max-width: 770px) {
+    .report-list {
+        max-height: 400px;
+        padding-left: 16px;
+    }
+    
+    .report-list--tall {
+        max-height: 500px;
+        padding-left: 16px;
+    }
+    
+    /* Ensure sections have enough height */
+    .section-content {
+        min-height: auto;
+        max-height: none;
+    }
+    
+    /* Add more spacing for report list items */
+    .report-list li {
+        margin: 8px 0;
+        line-height: 1.4;
     }
 }
 

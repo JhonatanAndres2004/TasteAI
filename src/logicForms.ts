@@ -27,6 +27,8 @@ signInButton?.addEventListener('click', async (event) => { // Fix 3: Add event p
     }
     try {
         await signIn(email, password);
+        await loadUserMenu(userManager.getUserId() as number);
+        await loadUserChatHistory(userManager.getUserId() as number);
     } catch (error) {
         console.error('Error during sign-in:', error);
     }
@@ -57,6 +59,32 @@ signUpButton?.addEventListener('click', async (event) => {
 }
 );
 
+async function loadUserMenu(id:number): Promise<void> {
+    const response = await fetch(`http://localhost:8000/loadUserMenu?id=${encodeURIComponent(id)}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+    const data = await response.json();
+    console.log("Response from loadUserMenu:", data);
+    if (data) {
+        localStorage.setItem('user_menus', JSON.stringify(data));
+    }
+}
+
+async function loadUserChatHistory(id:number): Promise<void> {
+    const response = await fetch(`http://localhost:8000/loadUserChatHistory?id=${encodeURIComponent(id)}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+    const data = await response.json();
+    if (data) {
+        localStorage.setItem('chat_history', JSON.stringify(data));
+    }
+}
 
 function showNotification(message: string, type: 'success' | 'error'): void { // Fix 4: Remove Promise<void> - this function doesn't return a promise
     // Remove existing notifications
@@ -528,6 +556,9 @@ document.addEventListener('DOMContentLoaded', () => {
     new ParticleSystem();
     new AuthForm();
     
+    //clea all the local storage in case some information of previous user is still in the local storage
+    localStorage.clear();
+
     // Add some interactive effects
     const glassForm = document.querySelector('.glass-form');
     

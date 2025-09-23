@@ -7,7 +7,7 @@ from fastapi.responses import RedirectResponse
 from enum import Enum
 from dotenv import load_dotenv
 
-from dbQueries import DBConnect, signUpUser,signInUser, updateBasicInformation,getAISuggestion,updateAdditionalInformation, getDetailedReport, getWeeklyMenus, getDailyModifiedMenu
+from dbQueries import DBConnect, signUpUser,signInUser, updateBasicInformation,getAISuggestion,updateAdditionalInformation, getDetailedReport, getWeeklyMenus, getDailyModifiedMenu, loadUserMenu, loadUserChatHistory
 from models import User, UserLogin, BasicInformationUser,AdditionalInformationUser, ModifyDailyMenuRequest
 
 load_dotenv()
@@ -100,7 +100,21 @@ async def modify_daily_menu(modifyRequest: ModifyDailyMenuRequest):
         return response
     else:
         return None
-@app.put("/updateDailyChatHistory")
-async def update_daily_chat_history(day:int ):
-    return
-    #TO-DO: create the class model containing the day and a recursive object that represents the conversation
+
+@app.get("/loadUserMenu")
+async def load_user_menu(id:int):
+    response=loadUserMenu(id)
+    if response:
+        print(response)
+        return response
+    else:
+        return None
+
+@app.get("/loadUserChatHistory")
+async def load_user_chat_history(id:int):
+    response=loadUserChatHistory(id)
+    if response:
+        print(response)
+        return response
+    else:
+        return None

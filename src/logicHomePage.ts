@@ -211,6 +211,9 @@ function createMenuDashboard(menuData: any) {
     
     // Setup chat functionality
     setupChatFunctionality();
+    
+    // Load day 1 chat history by default since day 1 is active initially
+    loadInitialChatHistory();
 }
 
 // Function to create chat interface
@@ -283,6 +286,18 @@ function setupTabSwitching() {
             if (currentDayText) {
                 currentDayText.textContent = `Day ${index + 1} - ${dayNames[index]}`;
             }
+
+            clearChatMessages();
+            
+            //Load existing messages from local storage, draw both system and user messages
+            const chatHistory = JSON.parse(localStorage.getItem('chat_history') || '{}');
+            const dayChatHistory = chatHistory["day"+(index+1)];
+            if (dayChatHistory) {
+                dayChatHistory.forEach((message: any) => {
+                    addMessageToChat(message.userRequest, 'user');
+                    addMessageToChat(message.response, 'assistant');
+                });
+            }
         });
     });
 }
@@ -351,6 +366,9 @@ function setupChatFunctionality() {
             // Add response message to chat
             if (result && result.notes) {
                 addMessageToChat(result.notes, 'assistant');
+                if(result["day"+dayNumber]) {
+                    modifyLocalStorageDailyMenu(dayNumber, result["day"+dayNumber],message,result.notes);
+                }
             } else {
                 addMessageToChat('Message received! Your menu is being updated.', 'assistant');
             }
@@ -385,6 +403,102 @@ function setupChatFunctionality() {
     });
 }
 
+function modifyLocalStorageDailyMenu(dayNumber: number, menu: Array<any>, message: string, response: string) {
+    const menuData = JSON.parse(localStorage.getItem('user_menus') || '{}');
+    //Check if that day's menu is not empty
+    if(menu.length > 0){
+        menuData["day"+dayNumber] = menu;
+        localStorage.setItem('user_menus', JSON.stringify(menuData));
+        // Refresh the dashboard for this specific day
+        refreshDashboardDay(dayNumber, menu);
+    }else{
+        console.log(`No changes made to the menu for day ${dayNumber} due to vague user request`);
+    }
+    //Now update the chat history in local storage
+    const currentChatHistory = JSON.parse(localStorage.getItem('chat_history') || '{}');
+    
+    //Initialize the chat history for the day if it doesn't exist
+    if (!currentChatHistory["day"+dayNumber]) {
+        currentChatHistory["day"+dayNumber] = [];
+      }
+
+    currentChatHistory["day"+dayNumber].push({
+        userRequest: message,
+        response: response
+    });
+    localStorage.setItem('chat_history', JSON.stringify(currentChatHistory));
+
+
+}
+
+// Function to refresh dashboard content for a specific day
+function refreshDashboardDay(dayNumber: number, updatedMenu: Array<any>) {
+    const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    const dayKey = `day${dayNumber}`;
+    
+    // Find the specific day panel
+    const dayPanel = document.querySelector(`.tab-panel[data-day="${dayKey}"]`) as HTMLElement;
+    if (!dayPanel) {
+        console.error(`Day panel not found for ${dayKey}`);
+        return;
+    }
+
+    // Calculate new totals for the updated menu
+    const totals = calculateDailyTotals(updatedMenu);
+    
+    // Update the day content
+    const dayIndex = dayNumber - 1;
+    const dayContent = `
+        <div class="day-content">
+            <div class="day-header">
+                <h2>${dayNames[dayIndex]} - Day ${dayNumber}</h2>
+                <div class="meal-count">
+                    <i class="fas fa-utensils"></i>
+                    <span>${updatedMenu.length} meals planned</span>
+                </div>
+            </div>
+            
+            <div class="meals-container">
+                ${updatedMenu.map((meal: any) => createMealComponent(meal)).join('')}
+            </div>
+            
+            ${createDailySummary(totals)}
+        </div>
+    `;
+    
+    // Add a subtle refresh animation
+    dayPanel.style.transition = 'opacity 0.3s ease-in-out';
+    dayPanel.style.opacity = '0.7';
+    
+    // Replace the content after a brief delay to show the animation
+    setTimeout(() => {
+        dayPanel.innerHTML = dayContent;
+        dayPanel.style.opacity = '1';
+        
+        // Also update the tab button to show it's been updated (optional visual feedback)
+        const tabButton = document.querySelector(`.tab-btn[data-day="${dayKey}"]`) as HTMLElement;
+        if (tabButton && tabButton.classList.contains('active')) {
+            // Add a brief highlight effect to the active tab
+            tabButton.style.boxShadow = '0 0 10px rgba(76, 175, 80, 0.5)';
+            setTimeout(() => {
+                tabButton.style.boxShadow = '';
+            }, 1000);
+        }
+    }, 150);
+    
+    console.log(`Dashboard refreshed for Day ${dayNumber}`);
+}
+
+// Function to clear chat messages (keeping only the default message)
+function clearChatMessages() {
+    const chatMessages = document.getElementById('chatMessages');
+    if (!chatMessages) return;
+    
+    // Remove all messages except the default message
+    const messages = chatMessages.querySelectorAll('.message:not(.default-message)');
+    messages.forEach(message => message.remove());
+}
+
 // Function to add message to chat
 function addMessageToChat(message: string, sender: string) {
     const chatMessages = document.getElementById('chatMessages');
@@ -408,204 +522,238 @@ function addMessageToChat(message: string, sender: string) {
     chatMessages.appendChild(messageElement);
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
-document.addEventListener('DOMContentLoaded', function() {
-    const userIcon = document.getElementById('userIcon');
-    const dropdownMenu = document.getElementById('dropdownMenu');
-    const addDetailsBtn = document.getElementById('addDetails');
-    const logOutBtn = document.getElementById('logOut');
-    const userData=userManager.getCurrentUser();
 
-    // Toggle dropdown menu when user icon is clicked
-    userIcon?.addEventListener('click', function(e) {
-        e.stopPropagation();
-        dropdownMenu?.classList.toggle('show');
-    });
-
-    // Close dropdown when clicking outside
-    document.addEventListener('click', function(e) {
-        if (!userIcon?.contains(e.target as Node) && !dropdownMenu?.contains(e.target as Node)) {
-            dropdownMenu?.classList.remove('show');
-        }
-    });
-
-    // Handle "Add Details" click
-    addDetailsBtn?.addEventListener('click', function() {
-        if(localStorage.getItem('user_data')){
-        window.location.href = 'profile.html';
-        }
-        else{
-            Swal.fire({
-                title:"No user found",
-                text:"Please, log-in again",
-                icon:'question',
-            })
-        }
-    });
-
-    // Handle "Log Out" click with SweetAlert confirmation
-    logOutBtn?.addEventListener('click', function() {
-        Swal.fire({
-            title: 'Logout Confirmation',
-            text: 'Are you sure you want to log out?',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#e74c3c',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Yes, Logout',
-            cancelButtonText: 'Cancel',
-            reverseButtons: true,
-            customClass: {
-                popup: 'swal-custom-popup',
-                confirmButton: 'swal-confirm-btn',
-                cancelButton: 'swal-cancel-btn'
-            }
-        }).then((result: any) => {
-            if (result.isConfirmed) {
-               userManager.logout();
-                Swal.fire({
-                    title: 'Logged Out',
-                    text: 'You have been logged out successfully.',
-                    icon: 'success',
-                    confirmButtonColor: '#28a745',
-                    customClass: {
-                        popup: 'swal-custom-popup',
-                        confirmButton: 'swal-confirm-btn'   
-                    }
-            })}
+// Function to load initial chat history for day 1
+function loadInitialChatHistory() {
+    // Load existing messages from local storage for day 1
+    const chatHistory = JSON.parse(localStorage.getItem('chat_history') || '{}');
+    const day1ChatHistory = chatHistory["day1"];
+    
+    if (day1ChatHistory) {
+        day1ChatHistory.forEach((message: any) => {
+            addMessageToChat(message.userRequest, 'user');
+            addMessageToChat(message.response, 'assistant');
         });
-    });
+    }
+}
 
-    // Add hover effect for logout button (additional visual feedback)
-    logOutBtn?.addEventListener('mouseenter', function() {
-        this.style.transform = 'scale(1.02)';
-    });
+document.addEventListener('DOMContentLoaded', function() {
+    // Show initial loading indicator
+    const initialLoadingIndicator = document.getElementById('initialLoadingIndicator') as HTMLElement;
+    
+    // Function to handle the page logic after loading delay
+    function handlePageLogic() {
+        const userIcon = document.getElementById('userIcon');
+        const dropdownMenu = document.getElementById('dropdownMenu');
+        const addDetailsBtn = document.getElementById('addDetails');
+        const logOutBtn = document.getElementById('logOut');
+        const userData=userManager.getCurrentUser();
 
-    logOutBtn?.addEventListener('mouseleave', function() {
-        this.style.transform = 'scale(1)';
-    });
+        // Toggle dropdown menu when user icon is clicked
+        userIcon?.addEventListener('click', function(e) {
+            e.stopPropagation();
+            dropdownMenu?.classList.toggle('show');
+        });
 
-    // Landing visibility vs. post-report placeholder
-    try {
-        const userDataParsed = JSON.parse(localStorage.getItem('user_data') || 'null');
-        const hasReport = Boolean(userDataParsed && userDataParsed['recommended_daily_calories']);
-        const landingEl = document.querySelector('.main-content.landing') as HTMLElement;
-        const hasMenus = getSafeMenuData()
-        const userId= userDataParsed.id
-        if (hasReport && landingEl && !hasMenus) {
-            landingEl.style.display = 'none';
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!userIcon?.contains(e.target as Node) && !dropdownMenu?.contains(e.target as Node)) {
+                dropdownMenu?.classList.remove('show');
+            }
+        });
 
-            const placeholder = document.createElement('div');
-            placeholder.className = 'report-placeholder';
-            placeholder.innerHTML = `
-                <div class="placeholder-card">
-                    <div class="placeholder-icon"><i class="fas fa-clipboard-list"></i></div>
-                    <h2>Your personalized content will appear here</h2>
-                    <p>We detected your recommended daily calories. This area will soon show your personalized menu and insights.</p>
-                    <button id="getMenusButton" class="getMenusButton"> Get my weekly menus! </button>
-                </div>
-            `;
-            document.getElementById('container')?.appendChild(placeholder);
-            const getMenusButton=document.getElementById('getMenusButton') as HTMLButtonElement;
+        // Handle "Add Details" click
+        addDetailsBtn?.addEventListener('click', function() {
+            if(localStorage.getItem('user_data')){
+            window.location.href = 'profile.html';
+            }
+            else{
+                Swal.fire({
+                    title:"No user found",
+                    text:"Please, log-in again",
+                    icon:'question',
+                })
+            }
+        });
 
-            getMenusButton?.addEventListener('click',async (event: any)=>{
-                event.preventDefault();
-                // Get loading and success elements
-                const loadingIndicator = document.getElementById('loadingIndicator') as HTMLElement;
-                const successMessage = document.getElementById('successMessage') as HTMLElement;
-                
-                // Disable button and show loading
-                getMenusButton.disabled = true;
-                loadingIndicator.classList.add('show');
-
-                try {
-                    const response = await fetch(`http://localhost:8000/getWeeklyMenus?id=${encodeURIComponent(userId)}`, {
-                    method: 'POST'
-                });
-                    if (!response.ok) {
-                        throw new Error('Failed to fetch weekly menus');
-                    }
-
-                    const menuData = await response.json();
-
-                    // Handle successful response
-                    console.log('Weekly menus:', menuData);
-                    
-                    // Save menu data to localStorage with proper handling of special characters
-                    try {
-                        // Ensure data is properly serializable
-                        const serializedData = JSON.stringify(menuData);
-                        localStorage.setItem('user_menus', serializedData);
-                    } catch (storageError) {
-                        console.error('Error saving to localStorage:', storageError);
-                        
-                        // Fallback: sanitize and try again
-                        try {
-                            // Create a deep clone to remove any non-serializable properties
-                            const sanitizedData = JSON.parse(JSON.stringify(menuData));
-                            localStorage.setItem('user_menus', JSON.stringify(sanitizedData));
-                        } catch (fallbackError) {
-                            console.error('Fallback storage also failed:', fallbackError);
-                            throw new Error('Failed to save menu data to localStorage');
-                        }
-                    }
-
-                    const creationDate= new Date().toISOString().split('T')[0];
-                    localStorage.setItem('creation_date', creationDate);
-
-                    loadingIndicator.classList.remove('show');
-                    successMessage.classList.add('show');
-                    // Hide success message after 1 second and reload page
-                    setTimeout(() => {
-                        successMessage.classList.remove('show');
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 400); // Wait for animation to complete
-                    }, 1000);
-
-                } catch (error) {
-                    console.error('Error fetching weekly menus:', error);
-                    
-                    // Hide loading indicator
-                    loadingIndicator.classList.remove('show');
-                    
-                    // Re-enable button
-                    getMenusButton.disabled = false;
-                    
-                    // Show error message using SweetAlert (for errors only)
+        // Handle "Log Out" click with SweetAlert confirmation
+        logOutBtn?.addEventListener('click', function() {
+            Swal.fire({
+                title: 'Logout Confirmation',
+                text: 'Are you sure you want to log out?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#e74c3c',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, Logout',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true,
+                customClass: {
+                    popup: 'swal-custom-popup',
+                    confirmButton: 'swal-confirm-btn',
+                    cancelButton: 'swal-cancel-btn'
+                }
+            }).then((result: any) => {
+                if (result.isConfirmed) {
                     Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'Failed to generate your weekly menus. Please try again.',
-                        confirmButtonText: 'OK'
+                        title: 'Logged Out',
+                        text: 'You have been logged out successfully.',
+                        icon: 'success',
+                        confirmButtonColor: '#28a745',
+                        timer: 1000,
+                        showConfirmButton: false,
+                        customClass: {
+                            popup: 'swal-custom-popup',
+                            confirmButton: 'swal-confirm-btn'   
+                        }
+                    }).then(() => {
+                        // Log out after the success message has been shown for 1 second
+                        userManager.logout();
                     });
                 }
             });
+        });
 
-        }else if(hasReport && landingEl && hasMenus){
-            landingEl.style.display = 'none';
-            createMenuDashboard(hasMenus);
+        // Add hover effect for logout button (additional visual feedback)
+        logOutBtn?.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.02)';
+        });
+
+        logOutBtn?.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1)';
+        });
+
+        // Landing visibility vs. post-report placeholder
+        try {
+            const userDataParsed = JSON.parse(localStorage.getItem('user_data') || 'null');
+            const hasReport = Boolean(userDataParsed && userDataParsed['recommended_daily_calories']);
+            const landingEl = document.querySelector('.main-content.landing') as HTMLElement;
+            const hasMenus = getSafeMenuData()
+            const userId= userDataParsed.id
+            if (hasReport && landingEl && !hasMenus) {
+                landingEl.style.display = 'none';
+
+                const placeholder = document.createElement('div');
+                placeholder.className = 'report-placeholder';
+                placeholder.innerHTML = `
+                    <div class="placeholder-card">
+                        <div class="placeholder-icon"><i class="fas fa-clipboard-list"></i></div>
+                        <h2>Your personalized content will appear here</h2>
+                        <p>We detected your recommended daily calories. This area will soon show your personalized menu and insights.</p>
+                        <button id="getMenusButton" class="getMenusButton"> Get my weekly menus! </button>
+                    </div>
+                `;
+                document.getElementById('container')?.appendChild(placeholder);
+                const getMenusButton=document.getElementById('getMenusButton') as HTMLButtonElement;
+
+                getMenusButton?.addEventListener('click',async (event: any)=>{
+                    event.preventDefault();
+                    // Get loading and success elements
+                    const loadingIndicator = document.getElementById('loadingIndicator') as HTMLElement;
+                    const successMessage = document.getElementById('successMessage') as HTMLElement;
+                    
+                    // Disable button and show loading
+                    getMenusButton.disabled = true;
+                    loadingIndicator.classList.add('show');
+
+                    try {
+                        const response = await fetch(`http://localhost:8000/getWeeklyMenus?id=${encodeURIComponent(userId)}`, {
+                        method: 'POST'
+                    });
+                        if (!response.ok) {
+                            throw new Error('Failed to fetch weekly menus');
+                        }
+
+                        const menuData = await response.json();
+
+                        // Handle successful response
+                        console.log('Weekly menus:', menuData);
+                        
+                        // Save menu data to localStorage with proper handling of special characters
+                        try {
+                            // Ensure data is properly serializable
+                            const serializedData = JSON.stringify(menuData);
+                            localStorage.setItem('user_menus', serializedData);
+                        } catch (storageError) {
+                            console.error('Error saving to localStorage:', storageError);
+                            
+                            // Fallback: sanitize and try again
+                            try {
+                                // Create a deep clone to remove any non-serializable properties
+                                const sanitizedData = JSON.parse(JSON.stringify(menuData));
+                                localStorage.setItem('user_menus', JSON.stringify(sanitizedData));
+                            } catch (fallbackError) {
+                                console.error('Fallback storage also failed:', fallbackError);
+                                throw new Error('Failed to save menu data to localStorage');
+                            }
+                        }
+
+
+                        loadingIndicator.classList.remove('show');
+                        successMessage.classList.add('show');
+                        // Hide success message after 1 second and reload page
+                        setTimeout(() => {
+                            successMessage.classList.remove('show');
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 400); // Wait for animation to complete
+                        }, 1000);
+
+                    } catch (error) {
+                        console.error('Error fetching weekly menus:', error);
+                        
+                        // Hide loading indicator
+                        loadingIndicator.classList.remove('show');
+                        
+                        // Re-enable button
+                        getMenusButton.disabled = false;
+                        
+                        // Show error message using SweetAlert (for errors only)
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Failed to generate your weekly menus. Please try again.',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                });
+
+            }else if(hasReport && landingEl && hasMenus){
+                landingEl.style.display = 'none';
+                createMenuDashboard(hasMenus);
+            }
+
+
+        } catch (err) {
+            console.error(err)
         }
 
+        // CTA button → profile page
+        const cta1 = document.getElementById('ctaCompleteProfile');
+        if (cta1) {
+            cta1.addEventListener('click', (e) => {
+                e.preventDefault();
+                if(localStorage.getItem('user_data')){
+                    window.location.href = 'profile.html';
+                }
+                else{
+                Swal.fire({
+                    title:"No user found",
+                    text:"Please, log-in again",
+                    icon:'question',
+                })
+                }
+            });
+        }
 
-    } catch (err) {
-        console.error(err)
+        // Hide initial loading indicator after page logic is complete
+        if (initialLoadingIndicator) {
+            initialLoadingIndicator.classList.remove('show');
+        }
     }
 
-    // CTA button → profile page
-    const cta1 = document.getElementById('ctaCompleteProfile');
-    if (cta1) {
-        cta1.addEventListener('click', (e) => {
-            e.preventDefault();
-            if(localStorage.getItem('user_data')){
-                window.location.href = 'profile.html';
-            }
-            else{
-            Swal.fire({
-                title:"No user found",
-                text:"Please, log-in again",
-                icon:'question',
-            })
-            }
-        });
-    }
+    // Wait for 0.5 seconds before processing the page logic
+    setTimeout(() => {
+        handlePageLogic();
+    }, 500);
 });
