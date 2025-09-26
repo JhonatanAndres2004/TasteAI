@@ -9,6 +9,7 @@ import json
 from datetime import datetime
 from typing import Optional, Dict, Any
 from processingAgent import MultiLLMService
+from vectorizedDatabase import PineconeVectorizedDatabase
 from string import Template
 load_dotenv()
 
@@ -72,6 +73,9 @@ AIAgent.providers = [
     AIAgent.openai_provider,
     AIAgent.anthropic_provider
 ]
+
+#Now initialize the vectorized database
+vectorizedDB= PineconeVectorizedDatabase()
 
 def createUsersTable():
     """
@@ -868,27 +872,43 @@ def getDailyModifiedMenu(id:int, day:int, userRequest:str):
 
     #Get the user name to personalize a bit the prompt
     userName=userData["name"]
-    chatHistory=None
-    '''
-    #Get relevant past messages for this user and day
-    chatHistoryQuery="""
-        SELECT request, response, creationDate FROM chat_history 
-        WHERE user_id = %s AND day = %s 
-        ORDER BY creationDate ASC
-    """
-    cursor.execute(chatHistoryQuery, (id, day))
-    chatHistoryRecords=cursor.fetchall()
+    recentChatHistory=None
+    #Gather last 3 messages from the chat history for this user and day from oldest to newest
+
+    pastRecentMessagesQuery="""
+        SELECT request, response FROM chat_history 
+        WHERE user_id = %s AND day = %s sort by creationDate DESC LIMIT 3"""
     
-    if chatHistoryRecords:
+    cursor.execute(pastRecentMessagesQuery, (id, day))
+    pastRecentMessagesRecords=cursor.fetchall()
+    if pastRecentMessagesRecords:
         # Format chat history for the AI prompt
-        chatHistory = "Previous conversation for this day:\n"
-        for record in chatHistoryRecords:
-            chatHistory += f"User: {record[0]}\nAssistant: {record[1]}\n---\n"
-        print(f"Found {len(chatHistoryRecords)} previous chat messages for user {id} and day {day}")
+        recentChatHistory = "Previous conversation for this day:\n"
+        for record in reversed(pastRecentMessagesRecords):  # Reverse to get oldest to newest
+            recentChatHistory += f"User: {record[0]}\nAssistant: {record[1]}\n---\n"
+        print(f"Found {len(pastRecentMessagesRecords)} recent chat messages for user {id} and day {day}")
     else:
-        chatHistory = None
+        recentChatHistory = None
         print(f"No previous chat history found for user {id} and day {day}")
-    '''
+
+    #Now gather past messages using pinecone vectorized DB
+    if vectorizedDB.index is not None:
+        try:
+            pastMessages=vectorizedDB.queryVectorizedDatabase(userRequest, namespace=id)
+            if pastMessages and 'matches' in pastMessages and len(pastMessages['matches']) > 0:
+                recentChatHistory = "Relevant past conversations:\n"
+                for match in pastMessages['matches']: #TO-DO : Clean up data depending on the similarity score and maybe recency score
+                    recentChatHistory += f"User: {match['metadata']['request']}\nAssistant: {match['metadata']['response']}\n---\n"
+                print(f"Found {len(pastMessages['matches'])} relevant past messages from vectorized DB for user {id}")
+            else:
+                print(f"No relevant past messages found in vectorized DB for user {id}")
+        except Exception as e:
+            print(f"Error querying vectorized DB: {e}")
+    else:
+        print("Vectorized DB is not initialized. Skipping retrieval of past messages.")
+
+
+
     #Read the prompt template from file
     with open("prompts/modifyDailyMenu.md", "r", encoding="utf-8") as f:
         template = Template(f.read())
@@ -912,7 +932,7 @@ def getDailyModifiedMenu(id:int, day:int, userRequest:str):
             country=country if country else "United States",
             menuOfTheDay=menuOfTheDay if menuOfTheDay else "No menu found for the day, hence, create a new one from scratch",
             userRequest=userRequest,
-            chatHistory=chatHistory if chatHistory else "No previous chat history found, hence, no additional context needed to understand the request",
+            recentChatHistory=recentChatHistory if recentChatHistory else "No previous chat history found, hence, no additional context needed to understand the request",
             userName=userName,
             dayKey= f"day{day}"
     )
@@ -1006,6 +1026,12 @@ def saveChatHistory(id:int, day:int, userRequest:str, response:str):
 def loadUserMenu(id:int):
     """
     Function to load the user menu from the database
+
+    Args:
+    id: Unique identifier for each user
+
+    Returns:
+    Object with the menu of the week
     """
     global mydb
     cursor=mydb.cursor(dictionary=True)
@@ -1036,6 +1062,12 @@ def loadUserMenu(id:int):
 def loadUserChatHistory(id:int):
     """
     Function to load the user chat history from the database
+
+    Args:
+    id: Unique identifier for each user
+
+    Returns:
+    Object with the chat history of the user divided by days
     """
     global mydb
     cursor=mydb.cursor(dictionary=True)

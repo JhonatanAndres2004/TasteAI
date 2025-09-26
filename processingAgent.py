@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 import anthropic
 import google.generativeai as genai
 import json
+
 class MultiLLMService:
     def __init__(self, providers: list, prompt:str=None):
         """
@@ -73,6 +74,15 @@ class MultiLLMService:
         return None
 
     def openai_provider(self, prompt:str) -> str:
+        """
+        Call OpenAI API with the given prompt and return the response as a string.
+
+        Args:
+            prompt (str): The input prompt to send to the LLM.
+
+        Returns:
+            str: The response from the OpenAI API.
+        """
         # Make API call
         response = self.openai_client.chat.completions.create(
             model="gpt-4",
@@ -85,6 +95,15 @@ class MultiLLMService:
         return result
 
     def anthropic_provider(self, prompt: str) -> str:
+        """
+        Call Anthropic API with the given prompt and return the response as a string.
+
+        Args:
+            prompt (str): The input prompt to send to the LLM.
+        
+        Returns:
+            str: The response from the Anthropic API.
+        """
         response = self.anthropic_client.messages.create(
             model="claude-sonnet-4-20250514",
             temperature=0.4,
@@ -98,6 +117,15 @@ class MultiLLMService:
         return result
 
     def gemini_provider(self, prompt: str) -> str:
+        """
+        Call gemini API with the given prompt and return the response as a string.
+
+        Args:
+            prompt (str): The input prompt to send to the LLM.
+
+        Returns:
+            str: The response from the gemini API.
+        """
         model = self.gemini_client.GenerativeModel("gemini-2.5-flash")
         response = model.generate_content(prompt, generation_config={"temperature": 0.4})
         result = response.text
