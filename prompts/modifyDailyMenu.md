@@ -54,8 +54,10 @@ The menu of the day is:
 The user request is:
 `$userRequest`
 
-The information about the chat history is:
+The information about the chat history is the following, there might be both recent and semantically related chat history. Recent chat history are the last messages the user sent about the menu of the day. Semantically related chat history are messages from earlier in the conversation that may not be recent but are relevant due to their semantic relation to the current user request.:
 `$chatHistory`
+
+`$semanticallyRelatedChatHistory`
 
 ## REQUEST TYPES 
 1. The user may want to add a new meal. In that case, add the meal and adjust the rest of the meals to meet the daily targets.

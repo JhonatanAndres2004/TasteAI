@@ -202,7 +202,7 @@ def createChatHistoryTable():
 
     create_chat_history_table_query="""
     CREATE TABLE if NOT EXISTS chat_history (
-        id INT PRIMARY KEY AUTO_INCREMENT,
+        message_id INT PRIMARY KEY AUTO_INCREMENT,
         user_id INT NOT NULL,
         day INT NOT NULL,
         request TEXT DEFAULT NULL,
@@ -875,37 +875,38 @@ def getDailyModifiedMenu(id:int, day:int, userRequest:str):
     recentChatHistory=None
     #Gather last 3 messages from the chat history for this user and day from oldest to newest
 
+    #Now gather past messages using pinecone vectorized DB
+    try:
+        semanticSearchResults=vectorizedDB.semantic_search(userRequest, id, day)
+    except Exception as e:
+        print(f"Error when retrieving past messages from vectorized DB: {e}")
+
+    #Search the response for each message ID in the SQL DB to get the full message
+    semanticallyRelatedChatHistory=""
+    if semanticSearchResults and len(semanticSearchResults["matches"])>0:
+        for match in semanticSearchResults:
+            message_id=match['id']
+            cursor.execute("SELECT request, response FROM chat_history WHERE message_id = %s", (message_id,))
+            record=cursor.fetchone()
+            if record:
+                semanticallyRelatedChatHistory+=f"User: {record[0]}\nAssistant: {record[1]}\n---\n"
+
+
+
     pastRecentMessagesQuery="""
         SELECT request, response FROM chat_history 
-        WHERE user_id = %s AND day = %s sort by creationDate DESC LIMIT 3"""
+        WHERE user_id = %s AND day = %s ORDER BY creationDate ASC LIMIT 3"""
     
     cursor.execute(pastRecentMessagesQuery, (id, day))
     pastRecentMessagesRecords=cursor.fetchall()
     if pastRecentMessagesRecords:
-        # Format chat history for the AI prompt
-        recentChatHistory = "Previous conversation for this day:\n"
-        for record in reversed(pastRecentMessagesRecords):  # Reverse to get oldest to newest
+        recentChatHistory = ""
+        for record in pastRecentMessagesRecords:
             recentChatHistory += f"User: {record[0]}\nAssistant: {record[1]}\n---\n"
         print(f"Found {len(pastRecentMessagesRecords)} recent chat messages for user {id} and day {day}")
     else:
         recentChatHistory = None
         print(f"No previous chat history found for user {id} and day {day}")
-
-    #Now gather past messages using pinecone vectorized DB
-    if vectorizedDB.index is not None:
-        try:
-            pastMessages=vectorizedDB.queryVectorizedDatabase(userRequest, namespace=id)
-            if pastMessages and 'matches' in pastMessages and len(pastMessages['matches']) > 0:
-                recentChatHistory = "Relevant past conversations:\n"
-                for match in pastMessages['matches']: #TO-DO : Clean up data depending on the similarity score and maybe recency score
-                    recentChatHistory += f"User: {match['metadata']['request']}\nAssistant: {match['metadata']['response']}\n---\n"
-                print(f"Found {len(pastMessages['matches'])} relevant past messages from vectorized DB for user {id}")
-            else:
-                print(f"No relevant past messages found in vectorized DB for user {id}")
-        except Exception as e:
-            print(f"Error querying vectorized DB: {e}")
-    else:
-        print("Vectorized DB is not initialized. Skipping retrieval of past messages.")
 
 
 
@@ -932,12 +933,14 @@ def getDailyModifiedMenu(id:int, day:int, userRequest:str):
             country=country if country else "United States",
             menuOfTheDay=menuOfTheDay if menuOfTheDay else "No menu found for the day, hence, create a new one from scratch",
             userRequest=userRequest,
-            recentChatHistory=recentChatHistory if recentChatHistory else "No previous chat history found, hence, no additional context needed to understand the request",
+            chatHistory=("Recent chat history: \n"+recentChatHistory) if recentChatHistory else "No recent chat history found",
+            semanticallyRelatedChatHistory=("Semantically related chat history: \n"+semanticallyRelatedChatHistory) if semanticallyRelatedChatHistory else "No semantically related chat history found",
             userName=userName,
             dayKey= f"day{day}"
     )
     print(prompt)
     #Make API call
+    return
     try:
         response = AIAgent.getLLMResponse(prompt)
         #Check if the day{day} key is empty
@@ -955,6 +958,7 @@ def getDailyModifiedMenu(id:int, day:int, userRequest:str):
         print(f"Error: {e}")
         return None
 
+getDailyModifiedMenu(1, 1, "I want to add more protein to my breakfast and remove any nuts from my meals due to allergies.")
 
 def saveModifiedDailyMenu(id:int, day:int, jsonPayload:object):
     """
@@ -969,14 +973,13 @@ def saveModifiedDailyMenu(id:int, day:int, jsonPayload:object):
     Success or failure message
     """
 
-    #It is necessary to cut data and only obtain the data of the day and not the notes
     global mydb
     cursor=mydb.cursor()
 
     save_modified_daily_menu_query=f"""
         UPDATE user_menus SET day{day} = %s WHERE user_id = %s
     """
-    try:#Check the length to see if it is an empty array
+    try: #Check the length to see if it is an empty array
         if jsonPayload[f"day{day}"].length > 0:
             cursor.execute(save_modified_daily_menu_query, (json.dumps(jsonPayload[f"day{day}"], ensure_ascii=False, default=str), id))
             mydb.commit()
@@ -1011,17 +1014,36 @@ def saveChatHistory(id:int, day:int, userRequest:str, response:str):
     save_chat_history_query=f"""
         INSERT INTO chat_history (user_id, day, request, response, creationDate) VALUES (%s, %s, %s, %s, %s)
     """
+    get_last_id_query="""select max(message_id) from chat_history where user_id=%s and day=%s"""
+
     try:
+        #First save to MySQL 
         cursor.execute(save_chat_history_query, (id, day, userRequest, response, datetime.now()))
         mydb.commit()
         print(f"Chat history for user {id} and day {day} saved successfully")
+
+        #Create the embedding for the user's request
+        generated_embedding=vectorizedDB.generate_embedding(userRequest)
+
+        #Get the last inserted ID of that user and day to use it as reference
+        cursor.execute(get_last_id_query, (id, day))
+        lastMessageID=cursor.fetchone()
+
+        if lastMessageID and lastMessageID[0]:
+            lastMessageID=lastMessageID[0]
+            print(f'Last ID for user {id} and day {day} is {lastMessageID}')
+
+        #Save the embedding in the vectorized DB
+        if generated_embedding is not None:
+            vectorizedDB.upsert_embedding(id, generated_embedding,lastMessageID,str(datetime.now()), userRequest, day)
+
         return {"status": "success", "message": f"Chat history for user {id} and day {day} saved successfully"}
     except Exception as e:
         print(f"Error: {e}")
         return {"status": "error", "message":e}
-    
     finally:
         cursor.close()
+
 
 def loadUserMenu(id:int):
     """
@@ -1091,3 +1113,6 @@ def loadUserChatHistory(id:int):
         return None
     finally:
         cursor.close()
+
+
+

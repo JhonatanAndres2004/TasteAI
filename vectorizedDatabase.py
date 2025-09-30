@@ -14,11 +14,7 @@ class PineconeVectorizedDatabase:
         self.pinecone_index_name=os.getenv('PINECONE_INDEX_NAME')
 
         if self.pinecone_api_key and self.pinecone_environment and self.pinecone_index_name:
-            self.pc=Pinecone.init(api_key=self.pinecone_api_key, environment=self.pinecone_environment)
-            if self.pinecone_index_name in Pinecone.list_indexes():
-                print(f"Connected to Pinecone index: {self.pinecone_index_name}")
-            else:
-                raise ValueError(f"Index {self.pinecone_index_name} does not exist in Pinecone.")
+            self.pc=Pinecone(api_key=self.pinecone_api_key, environment=self.pinecone_environment)
             
         if self.gemini_api_key:
             genai.configure(api_key=self.gemini_api_key)
@@ -41,7 +37,7 @@ class PineconeVectorizedDatabase:
             content=text,
             task_type="retrieval_document"
         )
-        return result
+        return result['embedding']
     
 
     def initialize_index(self)->Pinecone.Index:
@@ -56,24 +52,25 @@ class PineconeVectorizedDatabase:
         """
         try:
             index=self.pc.create_index(
-                name=self.index_name,
+                name=self.pinecone_index_name,
                 dimension=768,
                 metric="cosine",
                 spec=ServerlessSpec(cloud="aws",
                     region="us-east-1")
             )
-            print(f"Created index: {self.index_name}")
+            print(f"Created index: {self.pinecone_index_name}")
         except Exception as E:
-            print(f"Index {self.index_name} already exists ... {E}")
+            print(f"Index {self.pinecone_index_name} already exists ... {E}")
         finally:
             # Connect to index if already existant or after creation
-            index = self.pc.Index(self.index_name)
-            print(f"Connected to index: {self.index_name}")
+            index = self.pc.Index(self.pinecone_index_name)
+            print(f"Connected to index: {self.pinecone_index_name}")
             print(f"Index stats: {index.describe_index_stats()}")
             return index
 
+
     
-    def upsert_embedding(self, namespace: int, embedding: List[float], messageID:int,creationDate: str):
+    def upsert_embedding(self, namespace: int, embedding: List[float], messageID:int,creationDate: str, query:str, day:int) -> None:
         """
         Upsert a single embedding vector into the Pinecone index.
 
@@ -88,20 +85,19 @@ class PineconeVectorizedDatabase:
         """
         try:
             index = self.initialize_index()
-            index.upsert(
-                vectors=[{'id':messageID,'values': embedding, 'metadata': {'creationDate': creationDate}}],
+            index.upsert( #Here id refers to the messageID in the chat_history table, however, id key is required for pinecone
+                vectors=[{'id':str(messageID),'values': embedding, 'metadata': {'creationDate': creationDate, "query":query, "day":str(day)}}],
                 namespace=str(namespace)
             )
             print(f"Upserted embedding for namespace {namespace}")
             # Wait for indexing
             time.sleep(2)
-            print(f"Updated index stats: {index.describe_index_stats()}")
+            #print(f"Updated index stats: {index.describe_index_stats()}")
         except Exception as e:
             print(f"Error upserting embedding: {e}")
-            return None
 
 
-    def semantic_search(self,query: str,  namespace:int, top_k: int = 10) -> List[Dict]:
+    def semantic_search(self,query: str,  namespace:int, day: int, top_k: int = 10) -> List[Dict]:
         """
         Perform semantic search using Pinecone
 
@@ -116,18 +112,33 @@ class PineconeVectorizedDatabase:
         # Generate query embedding and initialize index
         query_embedding = self.generate_embedding(query)
         index = self.initialize_index()
-
+        results=[]
         # Search the query in Pinecone
         try:
             results = index.query(
                 vector=query_embedding,
                 top_k=top_k,
                 include_metadata=True,
-                namespace= namespace
+                namespace= str(namespace), 
+                filter={
+                    "day": {'$eq': str(day)},
+                }
             )
         except Exception as e:
             print(f"Error during search: {e}")
-            return []
+            results=[]
         finally:
-            print(f"Search results: {results}")
-        return results['matches']
+
+            #  Sort by message id to get chronological order
+            sorted_matches = sorted(results["matches"], key=lambda x: int(x["id"]))
+
+            # Eliminate last 3 as they will be obtained through SQL
+            trimmed_matches = sorted_matches[:-3] if len(sorted_matches) > 3 else []
+
+            # Only show results with a score of 0.75 or higher
+            filtered_matches = [m for m in trimmed_matches if m["score"] >= 0.75]
+
+            results["matches"] = filtered_matches
+            print(results)
+            print(type(results))
+        return results
