@@ -69,7 +69,14 @@ async function loadUserMenu(id:number): Promise<void> {
     const data = await response.json();
     console.log("Response from loadUserMenu:", data);
     if (data) {
-        localStorage.setItem('user_menus', JSON.stringify(data));
+        // The response is an array: [menuData, creationDate]
+        const [menuData, creationDate] = data;
+        
+        // Store the menu data
+        localStorage.setItem('user_menus', JSON.stringify(menuData));
+        
+        // Store the creation date separately
+        localStorage.setItem('user_menus_creation_date', creationDate);
     }
 }
 

@@ -2,7 +2,7 @@ import mysql.connector
 import os
 from dotenv import load_dotenv
 import bcrypt
-from models import User, UserLogin,BasicInformationUser,AdditionalInformationUser
+from models import User, UserLogin,BasicInformationUser,AdditionalInformationUser, UserFeedback
 from pydantic import EmailStr
 from openai import OpenAI
 import json
@@ -675,7 +675,7 @@ def saveDetailedReport(jsonPayload:object,id:int):
         cursor.close()
 
 
-def getWeeklyMenus(id:int):
+def getWeeklyMenus(id:int, userFeedback: UserFeedback = None):
     """
     Function that converts the user data into a dictionary. It contains the menu of
     the whole week divided by days. It contains breakfast, lunch, dinner and snacks are optional.
@@ -728,6 +728,17 @@ def getWeeklyMenus(id:int):
 
     nutritionalDeficiencyRisks = nutritionalDeficiencyRisks.translate(str.maketrans("", "", '[]"')) if nutritionalDeficiencyRisks else ""
 
+    # Handle user feedback
+    satisfactionLevel = userFeedback.get("satisfactionScore", "") if userFeedback else ""
+    portionSizeFeedback = userFeedback.get("portionSizeFeedback", "") if userFeedback else ""
+    ingredientsFeedback = userFeedback.get("ingredientsFeedback", "") if userFeedback else ""
+    moodFeedback = userFeedback.get("moodFeedback", "") if userFeedback else ""
+    varietyFeedback = userFeedback.get("varietyFeedback", "") if userFeedback else ""
+    physicalChangesFeedback = userFeedback.get("physicalChangesFeedback", "") if userFeedback else ""
+    
+    # Get last week's menu for context
+    lastWeekMenu = getLastWeekMenu(id)
+    
     #Read the prompt template from file
     with open("prompts/getWeeklyMenus.md", "r", encoding="utf-8") as f:
         template = Template(f.read())
@@ -749,7 +760,14 @@ def getWeeklyMenus(id:int):
             userSportiveDescription=("Sportive description: "+SportiveDescription)if SportiveDescription else "The patient does not have any sportive condition",
             userAllergies=("Allergies: " + allergies) if allergies else "The patient does not have any allergy",
             foodPreferences=("Food preferences: " + foodPreferences) if foodPreferences else "The patient does not have any food preference that must be considered",
-            country=country if country else "United States"
+            country=country if country else "United States",
+            satisfactionLevel=satisfactionLevel if (satisfactionLevel and satisfactionLevel != "") else "N/A",
+            portionSizeFeedback=portionSizeFeedback if (portionSizeFeedback and portionSizeFeedback != "") else "N/A",
+            ingredientsFeedback=ingredientsFeedback if (ingredientsFeedback and ingredientsFeedback != "") else "N/A",
+            moodFeedback=moodFeedback if (moodFeedback and moodFeedback != "") else "N/A",
+            varietyFeedback=varietyFeedback if (varietyFeedback and varietyFeedback != "") else "N/A",
+            physicalChangesFeedback=physicalChangesFeedback if (physicalChangesFeedback and physicalChangesFeedback != "") else "N/A",
+            lastWeekMenu=lastWeekMenu
             )
     print(prompt)
     try:
@@ -766,12 +784,93 @@ def getWeeklyMenus(id:int):
         return None
 
 
+def getLastWeekMenu(id: int):
+    """
+    Function to get the last week's menu for context in generating new menus
+    
+    Args:
+    id: Unique identifier for each user
+    
+    Returns:
+    String representation of the last week's menu or empty string if none exists
+    """
+    global mydb
+    cursor = mydb.cursor()
+    
+    try:
+        # Get the most recent menu for this user
+        get_last_menu_query = """
+            SELECT day1, day2, day3, day4, day5, day6, day7 
+            FROM user_menus 
+            WHERE user_id = %s 
+            ORDER BY creationDate DESC 
+            LIMIT 1
+        """
+        cursor.execute(get_last_menu_query, (id,))
+        last_menu = cursor.fetchone()
+        
+        if last_menu:
+            # Convert the database row to a dictionary with day keys
+            last_week_menu = {}
+            for day in range(1, 8):
+                day_data = last_menu[day - 1]  # day1 is index 0, day2 is index 1, etc.
+                if day_data:
+                    try:
+                        # Parse JSON string back to object
+                        last_week_menu[f"day{day}"] = json.loads(day_data)
+                    except json.JSONDecodeError:
+                        last_week_menu[f"day{day}"] = None
+                else:
+                    last_week_menu[f"day{day}"] = None
+            
+            # Convert to JSON string for template substitution
+            return json.dumps(last_week_menu, indent=2)
+        else:
+            return ""
+    
+    except Exception as e:
+        print(f"Error fetching last week's menu for user {id}: {e}")
+        return ""
+    
+    finally:
+        cursor.close()
+
+
+def clearUserChatHistory(id: int):
+    """
+    Function to clear all chat history for a specific user
+    
+    Args:
+    id: Unique identifier for each user
+    
+    Returns:
+    Success or failure message
+    """
+    global mydb
+    cursor = mydb.cursor()
+    
+    try:
+        # Delete all chat history for this user
+        delete_chat_history_query = "DELETE FROM chat_history WHERE user_id = %s"
+        cursor.execute(delete_chat_history_query, (id,))
+        mydb.commit()
+        print(f"Cleared chat history for user {id}")
+        return {"status": "success", "message": f"Chat history cleared for user {id}"}
+    
+    except Exception as e:
+        print(f"Error clearing chat history for user {id}: {e}")
+        return {"status": "error", "message": e}
+    
+    finally:
+        cursor.close()
+
+
 def saveWeeklyMenus(jsonPayload: object, id:int):
     """
-    Function to save the menus as single days in the menus database
+    Function to save the menus as single days in the menus database.
+    First deletes any existing menu and chat history for the user, then inserts the new menu.
 
     Args:
-
     jsonPayload: Data in JSON format. It is a dictionary with 7 keys, one for each day of the week. Each key contains a list of dictionaries, one for each meal of the day.
     id: Unique identifier for each user
 
@@ -782,18 +881,29 @@ def saveWeeklyMenus(jsonPayload: object, id:int):
     cursor=mydb.cursor()
     current_date = datetime.now().date()   # YYYY-MM-DD
 
-    save_weekly_menus_query="""
-        INSERT INTO user_menus (user_id, day1,
-         day2, day3,
-          day4, day5, 
-          day6, day7, creationDate) 
-          VALUES (%s, %s,
-           %s, %s,
-           %s, %s, 
-           %s, %s, %s)
-    """
-
     try:
+        # First, delete any existing menu for this user
+        delete_existing_menu_query = "DELETE FROM user_menus WHERE user_id = %s"
+        cursor.execute(delete_existing_menu_query, (id,))
+        print(f"Deleted existing menu for user {id}")
+
+        # Clear chat history for this user
+        clear_chat_result = clearUserChatHistory(id)
+        if clear_chat_result["status"] == "error":
+            print(f"Warning: Failed to clear chat history for user {id}")
+
+        # Then insert the new menu
+        save_weekly_menus_query="""
+            INSERT INTO user_menus (user_id, day1,
+             day2, day3,
+              day4, day5, 
+              day6, day7, creationDate) 
+              VALUES (%s, %s,
+               %s, %s,
+               %s, %s, 
+               %s, %s, %s)
+        """
+
         cursor.execute(save_weekly_menus_query, (id,json.dumps(jsonPayload["day1"]),
         json.dumps(jsonPayload["day2"]), json.dumps(jsonPayload["day3"]),
         json.dumps(jsonPayload["day4"]), json.dumps(jsonPayload["day5"]), 
@@ -940,7 +1050,6 @@ def getDailyModifiedMenu(id:int, day:int, userRequest:str):
     )
     print(prompt)
     #Make API call
-    return
     try:
         response = AIAgent.getLLMResponse(prompt)
         #Check if the day{day} key is empty
@@ -958,7 +1067,6 @@ def getDailyModifiedMenu(id:int, day:int, userRequest:str):
         print(f"Error: {e}")
         return None
 
-getDailyModifiedMenu(1, 1, "I want to add more protein to my breakfast and remove any nuts from my meals due to allergies.")
 
 def saveModifiedDailyMenu(id:int, day:int, jsonPayload:object):
     """
@@ -1065,6 +1173,7 @@ def loadUserMenu(id:int):
         user_menu=cursor.fetchone()
         if user_menu:
             user_menu_object={}
+            creationDate=user_menu["creationDate"]
             for day in range(1, 8):
                 day_data = user_menu[f"day{day}"]
                 if day_data:
@@ -1072,7 +1181,7 @@ def loadUserMenu(id:int):
                     user_menu_object[f"day{day}"] = json.loads(day_data)
                 else:
                     user_menu_object[f"day{day}"] = None
-            return user_menu_object
+            return user_menu_object, creationDate
         else:
             return None
     except Exception as e:

@@ -89,7 +89,6 @@ function captureInitialStates() {
         basicFormInitialState[input.name] = input.value;
     });
     
-    console.log('captureInitialStates - basicFormInitialState set to:', basicFormInitialState);
     
     // Capture initial state of additional form (will be updated when fields are added)
     updateAdditionalFormInitialState();
@@ -487,12 +486,10 @@ function validateAdditionalForm() {
 
 function hasBasicFormChanges() {
     const currentInputs = basicForm?.querySelectorAll('input, select');
-    console.log('hasBasicFormChanges - initial state:', basicFormInitialState);
     
     for (let input of currentInputs as NodeListOf<HTMLInputElement>) {
         const initialValue = basicFormInitialState[input.name as keyof typeof basicFormInitialState];
         const currentValue = input.value;
-        console.log(`Field ${input.name}: initial="${initialValue}" current="${currentValue}" changed=${initialValue !== currentValue}`);
         
         if (initialValue !== currentValue) {
             console.log('hasBasicFormChanges: true (found changes)');

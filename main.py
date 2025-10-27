@@ -8,7 +8,7 @@ from enum import Enum
 from dotenv import load_dotenv
 
 from dbQueries import DBConnect, signUpUser,signInUser, updateBasicInformation,getAISuggestion,updateAdditionalInformation, getDetailedReport, getWeeklyMenus, getDailyModifiedMenu, loadUserMenu, loadUserChatHistory
-from models import User, UserLogin, BasicInformationUser,AdditionalInformationUser, ModifyDailyMenuRequest
+from models import User, UserLogin, BasicInformationUser,AdditionalInformationUser, ModifyDailyMenuRequest, UserFeedback
 
 load_dotenv()
 app=FastAPI()
@@ -25,8 +25,6 @@ app.add_middleware(
 mydb=DBConnect()
 
 @app.get("/")
-async def initialGreeting():
-    return {"hello":"World"}
 
 @app.post("/signUp")
 async def signUp(user: User):
@@ -82,31 +80,32 @@ async def get_detailed_report(id:int):
     else:
         return None
     
-@app.post("/getWeeklyMenus")
-async def get_weekly_menus(id:int):
-    response=getWeeklyMenus(id)
+@app.post("/getWeeklyMenus") 
+async def get_weekly_menus(request: dict):
+    id = request.get("id")
+    userFeedback = request.get("userFeedback")
+    response=getWeeklyMenus(id, userFeedback)
     if response:
         print(response)
         return response
     else:
-        HTTPException(status_code=400, detail="Failed to obtain menus, please, try again")
+        raise HTTPException(status_code=400, detail="Failed to obtain menus, please, try again")
 
 @app.post("/modifyDailyMenu")
 async def modify_daily_menu(modifyRequest: ModifyDailyMenuRequest):
     #Lets send id, day and request to the function
     response=getDailyModifiedMenu(modifyRequest.id, modifyRequest.day, modifyRequest.userRequest)
     if response:
-        print(response)
         return response
     else:
         return None
 
 @app.get("/loadUserMenu")
 async def load_user_menu(id:int):
-    response=loadUserMenu(id)
-    if response:
-        print(response)
-        return response
+    result = loadUserMenu(id)
+    if result:
+        response, creationDate = result
+        return response, creationDate
     else:
         return None
 
@@ -114,7 +113,10 @@ async def load_user_menu(id:int):
 async def load_user_chat_history(id:int):
     response=loadUserChatHistory(id)
     if response:
-        print(response)
         return response
     else:
         return None
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)

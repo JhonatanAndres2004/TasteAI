@@ -1566,7 +1566,7 @@ body.has-chat-sidebar {
     }
     
     .chat-interface {
-        height: 400px;
+        height: 500px; /* Increased height for mobile */
     }
     
     #container {
@@ -1581,13 +1581,30 @@ body.has-chat-sidebar {
     }
     
     .chat-input-group {
-        flex-direction: column;
+        flex-direction: row; /* Keep in single row on mobile */
         gap: 10px;
+        align-items: flex-end;
     }
     
     .chat-send-btn {
-        align-self: stretch;
+        align-self: flex-end;
         justify-content: center;
+        padding: 12px 16px; /* Reduced padding for mobile */
+        min-width: 50px; /* Fixed width for icon only */
+    }
+    
+    .chat-send-btn span {
+        display: none; /* Hide "Send" text on mobile */
+    }
+    
+    .chat-send-btn i {
+        font-size: 1rem; /* Slightly larger icon */
+    }
+    
+    .chat-input {
+        flex: 1; /* Take remaining space */
+        min-height: 44px;
+        max-height: 80px; /* Reduced max height for mobile */
     }
     
     .chat-header {
@@ -1607,6 +1624,43 @@ body.has-chat-sidebar {
     }
     
     .chat-interface {
-        height: 350px;
+        height: 450px; /* Increased height for better mobile experience */
+    }
+}
+
+/* Extra small mobile devices */
+@media (max-width: 480px) {
+    .chat-interface {
+        height: 400px; /* Slightly smaller for very small screens */
+    }
+    
+    .chat-input-group {
+        gap: 8px;
+    }
+    
+    .chat-send-btn {
+        padding: 10px 12px;
+        min-width: 45px;
+    }
+    
+    .chat-input {
+        font-size: 0.9rem;
+        padding: 10px 14px;
+    }
+    
+    .chat-messages {
+        padding: 12px;
+    }
+    
+    .chat-input-container {
+        padding: 12px;
+    }
+    
+    .message-content {
+        padding: 10px 14px;
+    }
+    
+    .message-content p {
+        font-size: 0.9rem;
     }
 }

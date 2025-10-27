@@ -242,7 +242,7 @@ function createChatInterface() {
                         <textarea class="chat-input" id="chatInput" placeholder="Type your message here..." rows="2"></textarea>
                         <button class="chat-send-btn" id="chatSendBtn" type="button">
                             <i class="fas fa-paper-plane"></i>
-                            Send
+                            <span>Send</span>
                         </button>
                     </div>
                 </div>
@@ -537,6 +537,597 @@ function loadInitialChatHistory() {
     }
 }
 
+// Function to check if menu has expired (7+ days)
+function checkMenuExpiration() {
+    const creationDateStr = localStorage.getItem('user_menus_creation_date');
+    
+    if (!creationDateStr) {
+        console.log('No menu creation date found');
+        return;
+    }
+    
+    try {
+        const creationDate = new Date(creationDateStr);
+        const currentDate = new Date();
+        
+        // Calculate the difference in days
+        const timeDiff = currentDate.getTime() - creationDate.getTime();
+        const daysDiff = Math.floor(timeDiff / (1000 * 3600 * 24));
+        
+        console.log(`Menu age: ${daysDiff} days`);
+        
+        // If 7 or more days have passed, show expiration feedback form
+        if (daysDiff >= 7) {
+            showMenuExpirationForm(daysDiff);
+        }
+    } catch (error) {
+        console.error('Error checking menu expiration:', error);
+    }
+}
+
+// Function to show menu expiration feedback form
+function showMenuExpirationForm(daysDiff: number) {
+    Swal.fire({
+        title: 'Weekly Menu Feedback',
+        width: '650px',
+        html: `
+            <div style="text-align: left; max-height: 520px; overflow-y: auto; padding: 15px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; scrollbar-width: none; -ms-overflow-style: none;">
+                <style>
+                    .feedback-scroll-container::-webkit-scrollbar {
+                        display: none;
+                    }
+                </style>
+                <p style="text-align: center; color:rgb(8, 99, 189); font-weight: 600; margin-bottom: 15px; font-size: 0.95rem;">
+                    Your menu was created ${daysDiff} days ago and has expired.
+                </p>
+                <p style="text-align: center; margin-bottom: 25px; color: #555; font-size: 0.9rem;">
+                    Please share your feedback to help us improve your next menu!
+                </p>
+                
+                <div style="margin-bottom: 25px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 12px; color: #333; font-size: 0.95rem;">
+                        1. Overall, how satisfied were you with this week's meals?
+                    </label>
+                    <div style="display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 10px;">
+                        ${[1, 2, 3, 4, 5].map((num, idx) => {
+                            const colors = ['#dc2626', '#f59e0b', '#eab308', '#84cc16', '#10b981'];
+                            return `
+                                <input type="radio" name="satisfaction" value="${num}" id="satisfaction${num}" style="display: none;" ${num === 3 ? 'checked' : ''}>
+                                <label for="satisfaction${num}" class="rating-square" data-group="satisfaction" data-rating="${num}" style="
+                                    width: 40px;
+                                    height: 40px;
+                                    background: ${colors[idx]};
+                                    border-radius: 8px;
+                                    cursor: pointer;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    font-weight: 700;
+                                    color: white;
+                                    font-size: 0.95rem;
+                                    transition: all 0.2s ease;
+                                    border: 3px solid transparent;
+                                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                                " onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.2)'" 
+                                   onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 2px 8px rgba(0, 0, 0, 0.1)'"
+                                   onclick="document.querySelectorAll('[data-group=satisfaction]').forEach(el => el.style.border='3px solid transparent'); this.style.border='3px solid #009FE2';">
+                                    ${num}
+                                </label>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 25px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 12px; color: #333; font-size: 0.95rem;">
+                        2. Did the portion sizes feel appropriate?
+                    </label>
+                    <div style="position: relative;">
+                        <select id="portionSize" class="feedback-custom-select" style="
+                            width: 100%;
+                            padding: 12px 15px;
+                            background: rgba(255,255,255,0.9);
+                            border: 1px solid rgba(0,0,0,0.08);
+                            border-radius: 12px;
+                            color: #222;
+                            font-size: 0.95rem;
+                            font-family: inherit;
+                            cursor: pointer;
+                            transition: all 0.3s ease;
+                            appearance: base-select;
+                        " onfocus="this.style.borderColor='#009FE2'; this.style.boxShadow='0 0 0 3px rgba(0, 159, 226, 0.08)'"
+                           onblur="this.style.borderColor='rgba(0,0,0,0.08)'; this.style.boxShadow='none'">
+                            <button type="button" style="
+                                width: 100%;
+                                padding: 12px 15px;
+                                background: rgba(255,255,255,0.9);
+                                border: 1px solid rgba(0,0,0,0.08);
+                                border-radius: 12px;
+                                color: #222;
+                                font-size: 0.95rem;
+                                transition: all 0.3s ease;
+                                backdrop-filter: blur(5px);
+                                font-family: inherit;
+                                cursor: pointer;
+                                display: flex;
+                                align-items: center;
+                                justify-content: space-between;
+                                text-align: left;
+                            ">
+                                <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                                    <selectedcontent></selectedcontent>
+                                    <svg width="24" height="24" viewBox="0 0 24 24" style="color: #009FE2; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
+                                        <path fill="currentColor" d="m7 10l5 5l5-5z"/>
+                                    </svg>
+                                </div>
+                            </button>
+                            <div>
+                                <option value="just-right" selected>
+                                    <div style="display: flex; gap: 12px; align-items: center; width: 100%;">
+                                        <span style="flex: 1;">Just right</span>
+                                    </div>
+                                </option>
+                                <option value="too-small">
+                                    <div style="display: flex; gap: 12px; align-items: center; width: 100%;">
+                                        <span style="flex: 1;">Too small</span>
+                                    </div>
+                                </option>
+                                <option value="too-large">
+                                    <div style="display: flex; gap: 12px; align-items: center; width: 100%;">
+                                        <span style="flex: 1;">Too large</span>
+                                    </div>
+                                </option>
+                            </div>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 25px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 12px; color: #333; font-size: 0.95rem;">
+                        3. Which meals or ingredients would you prefer not to see again? (Optional)
+                    </label>
+                    <textarea id="avoidIngredients" placeholder="E.g., salmon, broccoli, spicy foods..." style="
+                        width: 100%;
+                        height: 70px;
+                        padding: 12px 15px;
+                        background: rgba(255,255,255,0.9);
+                        border: 1px solid rgba(0,0,0,0.08);
+                        border-radius: 12px;
+                        color: #222;
+                        font-size: 0.9rem;
+                        font-family: inherit;
+                        resize: vertical;
+                        transition: all 0.3s ease;
+                    " onfocus="this.style.borderColor='#009FE2'; this.style.boxShadow='0 0 0 3px rgba(0, 159, 226, 0.08)'"
+                       onblur="this.style.borderColor='rgba(0,0,0,0.08)'; this.style.boxShadow='none'"></textarea>
+                </div>
+
+                <div style="margin-bottom: 25px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 12px; color: #333; font-size: 0.95rem;">
+                        4. Did you notice any changes in how you feel?
+                    </label>
+                    <textarea id="feelingChanges" placeholder="More energy, better sleep, digestive comfort, etc..." style="
+                        width: 100%;
+                        height: 70px;
+                        padding: 12px 15px;
+                        background: rgba(255,255,255,0.9);
+                        border: 1px solid rgba(0,0,0,0.08);
+                        border-radius: 12px;
+                        color: #222;
+                        font-size: 0.9rem;
+                        font-family: inherit;
+                        resize: vertical;
+                        transition: all 0.3s ease;
+                    " onfocus="this.style.borderColor='#009FE2'; this.style.boxShadow='0 0 0 3px rgba(0, 159, 226, 0.08)'"
+                       onblur="this.style.borderColor='rgba(0,0,0,0.08)'; this.style.boxShadow='none'"></textarea>
+                </div>
+
+                <div style="margin-bottom: 25px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 12px; color: #333; font-size: 0.95rem;">
+                        5. How would you rate the variety of the menu?
+                    </label>
+                    <div style="display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 10px;">
+                        ${[1, 2, 3, 4, 5].map((num, idx) => {
+                            const colors = ['#dc2626', '#f59e0b', '#eab308', '#84cc16', '#10b981'];
+                            return `
+                                <input type="radio" name="variety" value="${num}" id="variety${num}" style="display: none;" ${num === 3 ? 'checked' : ''}>
+                                <label for="variety${num}" class="rating-square" data-group="variety" data-rating="${num}" style="
+                                    width: 40px;
+                                    height: 40px;
+                                    background: ${colors[idx]};
+                                    border-radius: 8px;
+                                    cursor: pointer;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    font-weight: 700;
+                                    color: white;
+                                    font-size: 0.95rem;
+                                    transition: all 0.2s ease;
+                                    border: 3px solid transparent;
+                                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                                " onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.2)'" 
+                                   onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 2px 8px rgba(0, 0, 0, 0.1)'"
+                                   onclick="document.querySelectorAll('[data-group=variety]').forEach(el => el.style.border='3px solid transparent'); this.style.border='3px solid #009FE2';">
+                                    ${num}
+                                </label>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 25px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 12px; color: #333; font-size: 0.95rem;">
+                        6. Did you notice any physical changes this week?
+                    </label>
+                    <div style="position: relative;">
+                        <select id="physicalChanges" class="feedback-custom-select" style="
+                            width: 100%;
+                            padding: 12px 15px;
+                            background: rgba(255,255,255,0.9);
+                            border: 1px solid rgba(0,0,0,0.08);
+                            border-radius: 12px;
+                            color: #222;
+                            font-size: 0.95rem;
+                            font-family: inherit;
+                            cursor: pointer;
+                            transition: all 0.3s ease;
+                            appearance: base-select;
+                        " onfocus="this.style.borderColor='#009FE2'; this.style.boxShadow='0 0 0 3px rgba(0, 159, 226, 0.08)'"
+                           onblur="this.style.borderColor='rgba(0,0,0,0.08)'; this.style.boxShadow='none'">
+                            <button type="button" style="
+                                width: 100%;
+                                padding: 12px 15px;
+                                background: rgba(255,255,255,0.9);
+                                border: 1px solid rgba(0,0,0,0.08);
+                                border-radius: 12px;
+                                color: #222;
+                                font-size: 0.95rem;
+                                transition: all 0.3s ease;
+                                backdrop-filter: blur(5px);
+                                font-family: inherit;
+                                cursor: pointer;
+                                display: flex;
+                                align-items: center;
+                                justify-content: space-between;
+                                text-align: left;
+                            ">
+                                <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                                    <selectedcontent></selectedcontent>
+                                    <svg width="24" height="24" viewBox="0 0 24 24" style="color: #009FE2; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);">
+                                        <path fill="currentColor" d="m7 10l5 5l5-5z"/>
+                                    </svg>
+                                </div>
+                            </button>
+                            <div>
+                                <option value="maintained" selected>
+                                    <div style="display: flex; gap: 12px; align-items: center; width: 100%;">
+                                        <span style="flex: 1;">Maintained</span>
+                                    </div>
+                                </option>
+                                <option value="lost-weight">
+                                    <div style="display: flex; gap: 12px; align-items: center; width: 100%;">
+                                        <span style="flex: 1;">Lost weight</span>
+                                    </div>
+                                </option>
+                                <option value="gained-muscle">
+                                    <div style="display: flex; gap: 12px; align-items: center; width: 100%;">
+                                        <span style="flex: 1;">Gained muscle</span>
+                                    </div>
+                                </option>
+                            </div>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="loadingContainer" style="display: none; text-align: center; margin-top: 25px; padding: 20px; background: rgba(0, 159, 226, 0.05); border-radius: 12px; border: 1px solid rgba(0, 159, 226, 0.1);">
+                    <div style="border: 4px solid rgba(0, 159, 226, 0.2); border-top: 4px solid #009FE2; border-radius: 50%; width: 50px; height: 50px; animation: feedbackSpin 1s linear infinite; margin: 0 auto;"></div>
+                    <p style="margin-top: 15px; color: #009FE2; font-weight: 600; font-size: 0.95rem;">Generating your new menu...</p>
+                </div>
+            </div>
+            <style>
+                @keyframes feedbackSpin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+                .swal2-popup {
+                    border-radius: 20px !important;
+                    padding: 25px !important;
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+                }
+                .swal2-title {
+                    color: #222 !important;
+                    font-size: 1.5rem !important;
+                    font-weight: 600 !important;
+                    margin-bottom: 15px !important;
+                }
+                /* Hide scrollbar for Webkit browsers */
+                .swal2-html-container::-webkit-scrollbar {
+                    display: none;
+                }
+                /* Hide scrollbar for Firefox */
+                .swal2-html-container {
+                    scrollbar-width: none;
+                }
+                /* Hide scrollbar for IE and Edge */
+                .swal2-html-container {
+                    -ms-overflow-style: none;
+                }
+                
+                /* Custom Select Styling */
+                .feedback-custom-select {
+                    appearance: base-select !important;
+                    background: none !important;
+                    padding: 0 !important;
+                    border: none !important;
+                    box-shadow: none !important;
+                }
+                
+                /* Picker icon hiding */
+                .feedback-custom-select::picker-icon {
+                    display: none;
+                }
+                
+                /* Picker transitions */
+                .feedback-custom-select::picker(select) {
+                    appearance: base-select;
+                    transition: opacity .2s ease, transform .2s cubic-bezier(0.4, 0, 0.2, 1), display .2s allow-discrete, overlay .2s allow-discrete;
+                    background: rgba(255, 255, 255, 0.95);
+                    border-radius: 12px;
+                    padding: 0;
+                    margin-block: 5px;
+                    box-shadow: 0 25px 45px rgba(0, 0, 0, 0.08);
+                    border: 1px solid rgba(0, 0, 0, 0.05);
+                    backdrop-filter: blur(8px);
+                }
+                
+                .feedback-custom-select:not(:open)::picker(select) {
+                    opacity: 0;
+                    transform: scale(.95);
+                }
+                
+                .feedback-custom-select:open::picker(select) {
+                    opacity: 1;
+                    transform: scale(1);
+                }
+                
+                /* Rotate arrow on open */
+                .feedback-custom-select:open > button svg {
+                    transform: rotate(0.5turn);
+                }
+                
+                /* Custom button focus styles */
+                .feedback-custom-select > button:focus-visible {
+                    outline: none;
+                    border-color: #009FE2;
+                    box-shadow: 0 0 0 3px rgba(0, 159, 226, 0.08);
+                    background: rgba(255,255,255,0.9);
+                }
+                
+                /* Option styling */
+                .feedback-custom-select > div {
+                    min-inline-size: calc(anchor-size(self-inline) + 20px);
+                    scroll-behavior: smooth;
+                    max-block-size: 20lh;
+                    scrollbar-width: thin;
+                }
+                
+                .feedback-custom-select > div option {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    padding: 12px 15px;
+                    font-size: 0.95rem;
+                    cursor: pointer;
+                    outline-offset: -1px;
+                    transition: all 0.2s ease;
+                }
+                
+                .feedback-custom-select > div option:is(:focus, :hover) {
+                    background: rgba(0, 159, 226, 0.1);
+                    color: inherit;
+                }
+                
+                .feedback-custom-select > div option:is(:checked) {
+                    background: linear-gradient(135deg, #009FE2 0%, #86e3ce 100%);
+                    color: white;
+                    font-weight: 600;
+                }
+                
+                /* Fallback for browsers that don't support appearance: base-select */
+                @supports not (appearance: base-select) {
+                    .feedback-custom-select {
+                        appearance: none !important;
+                        -webkit-appearance: none !important;
+                        -moz-appearance: none !important;
+                        background: rgba(255,255,255,0.9) !important;
+                        border: 1px solid rgba(0,0,0,0.08) !important;
+                        border-radius: 12px !important;
+                        padding: 12px 45px 12px 15px !important;
+                        color: #222 !important;
+                        font-size: 0.95rem !important;
+                        cursor: pointer !important;
+                        background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%23009FE2%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276,9 12,15 18,9%27%3e%3c/polyline%3e%3c/svg%3e') !important;
+                        background-repeat: no-repeat !important;
+                        background-position: right 12px center !important;
+                        background-size: 16px !important;
+                    }
+                    
+                    .feedback-custom-select > button,
+                    .feedback-custom-select > div {
+                        display: none !important;
+                    }
+                    
+                    .feedback-custom-select option {
+                        background-color: #ebf5fd !important;
+                        color: #222 !important;
+                        padding: 8px 12px !important;
+                    }
+                }
+            </style>
+        `,
+        showCancelButton: false,
+        showConfirmButton: true,
+        confirmButtonText: 'Generate Next Week\'s Menu',
+        allowOutsideClick: false,
+        customClass: {
+            popup: 'swal-custom-popup',
+            confirmButton: 'swal-feedback-confirm-btn'
+        },
+        didOpen: () => {
+            // Apply custom styling to the confirm button
+            const confirmBtn = document.querySelector('.swal-feedback-confirm-btn') as HTMLElement;
+            if (confirmBtn) {
+                confirmBtn.style.background = 'linear-gradient(135deg, #009FE2 0%, #86e3ce 100%)';
+                confirmBtn.style.borderRadius = '12px';
+                confirmBtn.style.padding = '12px 24px';
+                confirmBtn.style.fontSize = '1rem';
+                confirmBtn.style.fontWeight = '600';
+                confirmBtn.style.transition = 'all 0.3s ease';
+                confirmBtn.style.border = 'none';
+                confirmBtn.style.boxShadow = '0 8px 25px rgba(0, 159, 226, 0.15)';
+                confirmBtn.onmouseover = () => {
+                    confirmBtn.style.background = 'linear-gradient(135deg, #0089c7 0%, #6dd6b8 100%)';
+                    confirmBtn.style.transform = 'translateY(-2px)';
+                    confirmBtn.style.boxShadow = '0 12px 35px rgba(0, 159, 226, 0.25)';
+                };
+                confirmBtn.onmouseout = () => {
+                    confirmBtn.style.background = 'linear-gradient(135deg, #009FE2 0%, #86e3ce 100%)';
+                    confirmBtn.style.transform = 'translateY(0)';
+                    confirmBtn.style.boxShadow = '0 8px 25px rgba(0, 159, 226, 0.15)';
+                };
+            }
+            
+            // Set initial checked state for rating squares
+            const satisfaction3 = document.getElementById('satisfaction3');
+            const variety3 = document.getElementById('variety3');
+            if (satisfaction3 && satisfaction3.nextElementSibling) {
+                (satisfaction3.nextElementSibling as HTMLElement).style.border = '3px solid #009FE2';
+            }
+            if (variety3 && variety3.nextElementSibling) {
+                (variety3.nextElementSibling as HTMLElement).style.border = '3px solid #009FE2';
+            }
+        },
+        preConfirm: async () => {
+            // Collect feedback data
+            const satisfactionRadio = document.querySelector('input[name="satisfaction"]:checked') as HTMLInputElement;
+            const portionSizeSelect = document.getElementById('portionSize') as HTMLSelectElement;
+            const avoidIngredientsTextarea = document.getElementById('avoidIngredients') as HTMLTextAreaElement;
+            const feelingChangesTextarea = document.getElementById('feelingChanges') as HTMLTextAreaElement;
+            const varietyRadio = document.querySelector('input[name="variety"]:checked') as HTMLInputElement;
+            const physicalChangesSelect = document.getElementById('physicalChanges') as HTMLSelectElement;
+
+            // Store feedback values (for future use)
+            const feedbackData = {
+                satisfactionScore: parseInt(satisfactionRadio?.value || '3'),
+                portionSizeFeedback: portionSizeSelect?.value || 'just-right',
+                ingredientsFeedback: avoidIngredientsTextarea?.value || '',
+                moodFeedback: feelingChangesTextarea?.value || '',
+                varietyFeedback: parseInt(varietyRadio?.value || '3'),
+                physicalChangesFeedback: physicalChangesSelect?.value || 'maintained'
+            };
+
+            console.log('Feedback data collected:', feedbackData);
+
+            // Hide the confirm button and show loading
+            const confirmButton = Swal.getConfirmButton();
+            if (confirmButton) {
+                confirmButton.style.display = 'none';
+            }
+            
+            const loadingContainer = document.getElementById('loadingContainer');
+            if (loadingContainer) {
+                loadingContainer.style.display = 'block';
+            }
+
+            // Get user ID
+            const userData = JSON.parse(localStorage.getItem('user_data') || '{}');
+            const userId = userData.id;
+
+            if (!userId) {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'User not found. Please log in again.',
+                    icon: 'error'
+                });
+                return false;
+            }
+
+            try {
+                // Call the menu generation endpoint with feedback data
+                const response = await fetch('http://localhost:8000/getWeeklyMenus', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        id: userId,
+                        userFeedback: feedbackData
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch weekly menus');
+                }
+
+                const menuData = await response.json();
+                console.log('New weekly menus:', menuData);
+
+                // Save menu data to localStorage
+                try {
+                    const serializedData = JSON.stringify(menuData);
+                    localStorage.setItem('user_menus', serializedData);
+                    
+                    // Save the new creation date
+                    const creationDate = new Date().toISOString();
+                    localStorage.setItem('user_menus_creation_date', creationDate);
+                    
+                    // Clear chat history from localStorage
+                    localStorage.removeItem('chat_history');
+                    console.log('Chat history cleared from localStorage');
+                } catch (storageError) {
+                    console.error('Error saving to localStorage:', storageError);
+                    
+                    // Fallback: sanitize and try again
+                    const sanitizedData = JSON.parse(JSON.stringify(menuData));
+                    localStorage.setItem('user_menus', JSON.stringify(sanitizedData));
+                    
+                    const creationDate = new Date().toISOString();
+                    localStorage.setItem('user_menus_creation_date', creationDate);
+                    
+                    // Clear chat history from localStorage
+                    localStorage.removeItem('chat_history');
+                    console.log('Chat history cleared from localStorage');
+                }
+
+                return true;
+            } catch (error) {
+                console.error('Error generating new menu:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Failed to generate your weekly menus. Please try again.',
+                    confirmButtonText: 'OK'
+                });
+                return false;
+            }
+        }
+    }).then((result: any) => {
+        if (result.isConfirmed && result.value === true) {
+            // Show success message and reload
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: 'Your new weekly menu has been generated.',
+                timer: 1500,
+                showConfirmButton: false
+            }).then(() => {
+                window.location.reload();
+            });
+        }
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // Show initial loading indicator
     const initialLoadingIndicator = document.getElementById('initialLoadingIndicator') as HTMLElement;
@@ -657,8 +1248,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     loadingIndicator.classList.add('show');
 
                     try {
-                        const response = await fetch(`http://localhost:8000/getWeeklyMenus?id=${encodeURIComponent(userId)}`, {
-                        method: 'POST'
+                        const response = await fetch('http://localhost:8000/getWeeklyMenus', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            id: userId,
+                            userFeedback: null
+                        })
                     });
                         if (!response.ok) {
                             throw new Error('Failed to fetch weekly menus');
@@ -674,6 +1272,14 @@ document.addEventListener('DOMContentLoaded', function() {
                             // Ensure data is properly serializable
                             const serializedData = JSON.stringify(menuData);
                             localStorage.setItem('user_menus', serializedData);
+                            
+                            // Save the creation date
+                            const creationDate = new Date().toISOString();
+                            localStorage.setItem('user_menus_creation_date', creationDate);
+                            
+                            // Clear chat history from localStorage
+                            localStorage.removeItem('chat_history');
+                            console.log('Chat history cleared from localStorage');
                         } catch (storageError) {
                             console.error('Error saving to localStorage:', storageError);
                             
@@ -682,6 +1288,14 @@ document.addEventListener('DOMContentLoaded', function() {
                                 // Create a deep clone to remove any non-serializable properties
                                 const sanitizedData = JSON.parse(JSON.stringify(menuData));
                                 localStorage.setItem('user_menus', JSON.stringify(sanitizedData));
+                                
+                                // Save the creation date
+                                const creationDate = new Date().toISOString();
+                                localStorage.setItem('user_menus_creation_date', creationDate);
+                                
+                                // Clear chat history from localStorage
+                                localStorage.removeItem('chat_history');
+                                console.log('Chat history cleared from localStorage');
                             } catch (fallbackError) {
                                 console.error('Fallback storage also failed:', fallbackError);
                                 throw new Error('Failed to save menu data to localStorage');
@@ -721,6 +1335,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }else if(hasReport && landingEl && hasMenus){
                 landingEl.style.display = 'none';
                 createMenuDashboard(hasMenus);
+                // Check if menu has expired
+                checkMenuExpiration();
             }
 
 

@@ -71,6 +71,21 @@ When creating the diet plan, you must consider that the user is from $country. P
 ## Ingredients, instructions and basic information about the menu
 You must specify not only the ingredients but also the recipe (how to make the dish) and the nutritional relevant value of each dish (calories, protein, fat and carbohydrates). All information must be structured using the JSON schema provided
 
+## PAST WEEK CONTEXT
+If the user has created menus previously, context about last week's menu and their experience with it will be provided. Use this to generate a more tailored menu. Remember to not repeat the same food on the same days an hours. This previous menu will also be useful to guarantee variety across the weeks.
+
+**Last Week's Menu:** $lastWeekMenu
+
+**User Feedback:**
+- Overall satisfaction rating: $satisfactionLevel (scale: 1-5)
+- Portion size feedback: $portionSizeFeedback
+- Meals/ingredients to avoid: $ingredientsFeedback
+- Reported changes in well-being: $moodFeedback
+- Menu variety rating: $varietyFeedback (scale: 1-5, where 5 = highest variety)
+- Physical changes observed: $physicalChangesFeedback
+ 
+
+
 ## OUTPUT JSON SCHEMA
 
 

@@ -10,6 +10,7 @@ class Objectives(str, Enum):
     maintenance = "Maintenance"
 
 
+
 class User(BaseModel):
     name: str =Field(default="User", min_length=6, max_length=35)
     email: EmailStr
@@ -87,3 +88,20 @@ class ModifyDailyMenuRequest(BaseModel):
     day: int
     userRequest: str
     
+class physicalChanges(str, Enum):
+    weight_loss = "Weight Loss"
+    muscle_gain = "Muscle Gain"
+    maintained = "Maintained"
+
+class portionSize(str, Enum):
+    too_small = "Too Small"
+    too_large = "Too Large"
+    just_right = "Just Right"
+
+class UserFeedback(BaseModel):
+    satisfactionScore: int|None = Field(default=None, ge=1, le=5)
+    portionSizeFeedback: str|None = Field(default=None)
+    ingredientsFeedback: str|None = Field(default=None)
+    moodFeedback: str|None = Field(default=None)
+    varietyFeedback: int|None = Field(default=None, ge=1, le=5)
+    physicalChangesFeedback: str|None = Field(default=None)
