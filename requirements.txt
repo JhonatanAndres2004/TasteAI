@@ -1,0 +1,10 @@
+# Python requirements for TasteAI
+fastapi
+pydantic
+dotenv
+mysql-connector-python
+bcrypt
+openai
+anthropic
+google-generativeai
+pinecone-client
