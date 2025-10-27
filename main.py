@@ -117,6 +117,3 @@ async def load_user_chat_history(id:int):
     else:
         return None
 
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
