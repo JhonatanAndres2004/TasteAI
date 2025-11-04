@@ -60,7 +60,7 @@ signUpButton?.addEventListener('click', async (event) => {
 );
 
 async function loadUserMenu(id:number): Promise<void> {
-    const response = await fetch(`http://localhost:8000/loadUserMenu?id=${encodeURIComponent(id)}`, {
+    const response = await fetch(`/api/loadUserMenu?id=${encodeURIComponent(id)}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'
@@ -81,7 +81,7 @@ async function loadUserMenu(id:number): Promise<void> {
 }
 
 async function loadUserChatHistory(id:number): Promise<void> {
-    const response = await fetch(`http://localhost:8000/loadUserChatHistory?id=${encodeURIComponent(id)}`, {
+    const response = await fetch(`/api/loadUserChatHistory?id=${encodeURIComponent(id)}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'
@@ -150,7 +150,7 @@ function showNotification(message: string, type: 'success' | 'error'): void { //
 // Fix 5: Add colon before return type
 export async function signIn(signInEmail: string, signInPassword: string): Promise<void> {
     try {
-        const response = await fetch('http://localhost:8000/signIn', {
+        const response = await fetch('/api/signIn', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -191,7 +191,7 @@ export async function signIn(signInEmail: string, signInPassword: string): Promi
 
 export async function signUp(params: signUpParams): Promise<void> {
     try {
-        const response = await fetch('http://localhost:8000/signUp', {
+        const response = await fetch('/api/signUp', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

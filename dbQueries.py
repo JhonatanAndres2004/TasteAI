@@ -993,9 +993,30 @@ def getDailyModifiedMenu(id:int, day:int, userRequest:str):
 
     #Search the response for each message ID in the SQL DB to get the full message
     semanticallyRelatedChatHistory=""
-    if semanticSearchResults and len(semanticSearchResults["matches"])>0:
-        for match in semanticSearchResults:
-            message_id=match['id']
+    # Normalize the matches so we can support both dict-style responses and Pinecone QueryResponse objects
+    matches = []
+    if semanticSearchResults:
+        # If the result is a dict-like object returned by some clients
+        try:
+            if isinstance(semanticSearchResults, dict) and "matches" in semanticSearchResults:
+                matches = semanticSearchResults["matches"] or []
+            else:
+                # Fallback to attribute access for QueryResponse objects
+                matches = getattr(semanticSearchResults, "matches", []) or []
+        except Exception as e:
+            print(f"Warning: couldn't parse semanticSearchResults: {e}")
+
+    if matches and len(matches) > 0:
+        for match in matches:
+            # match can be a dict or an object; handle both
+            try:
+                message_id = match.get('id') if isinstance(match, dict) else getattr(match, 'id', None)
+            except Exception:
+                message_id = None
+
+            if not message_id:
+                continue
+
             cursor.execute("SELECT request, response FROM chat_history WHERE message_id = %s", (message_id,))
             record=cursor.fetchone()
             if record:

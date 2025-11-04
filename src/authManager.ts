@@ -232,7 +232,7 @@ export class UserManager {
         this.broadcastUserChange('logout', null);
         console.log('User logged out');
         // Optionally redirect to login page
-        window.location.href = 'http://localhost:5500/static/index.html';
+        window.location.href = '/api/index.html';
     }
 
     // Clear all user data

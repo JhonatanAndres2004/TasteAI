@@ -348,7 +348,7 @@ function setupChatFunctionality() {
         chatInput.value = '';
         console.log('Information to send:', JSON.stringify(informationToSend));
         try {
-            const response = await fetch('http://localhost:8000/modifyDailyMenu', {
+            const response = await fetch('/api/modifyDailyMenu', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1055,7 +1055,7 @@ function showMenuExpirationForm(daysDiff: number) {
 
             try {
                 // Call the menu generation endpoint with feedback data
-                const response = await fetch('http://localhost:8000/getWeeklyMenus', {
+                const response = await fetch('/api/getWeeklyMenus', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1248,7 +1248,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     loadingIndicator.classList.add('show');
 
                     try {
-                        const response = await fetch('http://localhost:8000/getWeeklyMenus', {
+                        const response = await fetch('/api/getWeeklyMenus', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',

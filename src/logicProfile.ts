@@ -641,7 +641,7 @@ async function handleBasicFormSubmission(event: Event) {
     });
     
     try {
-        const response = await fetch('http://localhost:8000/updateBasicInformation', {
+        const response = await fetch('/api/updateBasicInformation', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -762,7 +762,7 @@ async function handleAdditionalFormSubmission(event: Event) {
     });
     
     try {
-        const response = await fetch('http://localhost:8000/getAISuggestion', {
+        const response = await fetch('/api/getAISuggestion', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -1047,7 +1047,7 @@ async function showGetReportButton(validatedData: ValidationResponse) {
             };
 
             // Start save to database (independent)
-            fetch('http://localhost:8000/updateAdditionalInformation', {
+            fetch('/api/updateAdditionalInformation', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -1083,7 +1083,7 @@ async function showGetReportButton(validatedData: ValidationResponse) {
                     throw new Error('Missing user id for report generation');
                 }
 
-                const reportResponse = await fetch(`http://localhost:8000/getDetailedReport?id=${encodeURIComponent(idToUse)}`, {
+                const reportResponse = await fetch(`/api/getDetailedReport?id=${encodeURIComponent(idToUse)}`, {
                     method: 'POST'
                 });
 
